@@ -31,11 +31,10 @@ function seed_account(Database $db, array $roleIds, string $roleSlug, string $na
 
 $genPassword = static fn () => 'Ht' . bin2hex(random_bytes(4)) . '!9';
 
-$ownerPassword = $genPassword();
 $managerPassword = $genPassword();
 $developerPassword = $genPassword();
 
-seed_account($db, $roleIds, 'owner', 'Store Owner', 'owner@happytails.test', $ownerPassword);
+seed_account($db, $roleIds, 'owner', 'Store Owner', 'admin@gmail.com', 'admin123');
 seed_account($db, $roleIds, 'manager', 'Store Manager', 'manager@happytails.test', $managerPassword);
 seed_account($db, $roleIds, 'developer', 'Dev Account', 'developer@happytails.test', $developerPassword);
 
