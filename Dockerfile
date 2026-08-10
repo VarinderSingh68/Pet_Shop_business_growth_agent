@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev \
         libcurl4-openssl-dev \
         libsqlite3-dev \
+        libonig-dev \
         unzip \
         git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
