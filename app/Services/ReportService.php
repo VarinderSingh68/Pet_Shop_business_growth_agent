@@ -90,7 +90,7 @@ final class ReportService
     public function customerCohortsWithRetention(): array
     {
         $cohorts = Database::instance()->select(
-            "SELECT DATE_FORMAT(MIN(o.placed_at), '%Y-%m') AS cohort_month, o.user_id,
+            "SELECT strftime('%Y-%m', MIN(o.placed_at)) AS cohort_month, o.user_id,
                     COUNT(*) AS order_count
              FROM orders o
              WHERE o.user_id IS NOT NULL AND o.status != 'cancelled'
@@ -121,7 +121,7 @@ final class ReportService
             "SELECT s.name AS service_name,
                     COUNT(sl.id) AS total_slots,
                     SUM(sl.is_booked) AS booked_slots,
-                    ROUND(SUM(sl.is_booked) / COUNT(sl.id) * 100, 1) AS utilization_percent
+                    ROUND(CAST(SUM(sl.is_booked) AS REAL) / COUNT(sl.id) * 100, 1) AS utilization_percent
              FROM service_slots sl
              JOIN services s ON s.id = sl.service_id
              WHERE DATE(sl.start_at) BETWEEN :from AND :to
@@ -136,7 +136,7 @@ final class ReportService
         return Database::instance()->select(
             "SELECT p.name AS product_name, v.label AS variant_label, v.stock_quantity AS current_stock,
                     COALESCE((SELECT SUM(oi.quantity) FROM order_items oi JOIN orders o ON o.id = oi.order_id
-                              WHERE oi.variant_id = v.id AND o.placed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND o.status != 'cancelled'), 0) AS units_sold_30d
+                              WHERE oi.variant_id = v.id AND o.placed_at >= datetime('now', '-30 days') AND o.status != 'cancelled'), 0) AS units_sold_30d
              FROM product_variants v
              JOIN products p ON p.id = v.product_id
              WHERE v.deleted_at IS NULL AND p.deleted_at IS NULL

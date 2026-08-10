@@ -5,57 +5,25 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Database;
-use PDO;
 
 /**
- * Dumps and restores via plain PDO rather than shelling out to mysqldump —
- * shared hosting frequently doesn't expose the binary or allow exec(), so a
- * pure-PHP dump is the only approach guaranteed to work everywhere this app
- * deploys.
+ * The whole database is a single SQLite file, so backup/restore is just a
+ * clean file copy — `VACUUM INTO` produces an atomic, consistent snapshot
+ * even while the live connection is open (SQLite handles the locking).
  */
 final class BackupService
 {
     public function createBackup(): string
     {
-        $pdo = Database::pdo();
-        $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-
-        $sql = "-- Happy Tails Pet Store backup\n-- Generated " . now() . "\n\n";
-        $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
-
-        foreach ($tables as $table) {
-            $createRow = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch();
-            $sql .= "DROP TABLE IF EXISTS `{$table}`;\n{$createRow['Create Table']};\n\n";
-
-            $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(PDO::FETCH_ASSOC);
-            foreach (array_chunk($rows, 200) as $chunk) {
-                if ($chunk === []) {
-                    continue;
-                }
-                $columns = array_keys($chunk[0]);
-                $columnList = implode(', ', array_map(static fn (string $c) => "`{$c}`", $columns));
-                $valueLines = [];
-
-                foreach ($chunk as $row) {
-                    $values = array_map(static function ($v) use ($pdo) {
-                        return $v === null ? 'NULL' : $pdo->quote((string) $v);
-                    }, $row);
-                    $valueLines[] = '(' . implode(', ', $values) . ')';
-                }
-
-                $sql .= "INSERT INTO `{$table}` ({$columnList}) VALUES\n" . implode(",\n", $valueLines) . ";\n";
-            }
-            $sql .= "\n";
-        }
-
-        $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
-
-        $filename = 'backup-' . date('Y-m-d-His') . '.sql';
+        $filename = 'backup-' . date('Y-m-d-His') . '.sqlite';
         $dir = storage_path('backups');
         if (!is_dir($dir)) {
             mkdir($dir, 0775, true);
         }
-        file_put_contents($dir . '/' . $filename, $sql);
+
+        $destPath = $dir . '/' . $filename;
+        $pdo = Database::pdo();
+        $pdo->exec('VACUUM INTO ' . $pdo->quote($destPath));
 
         return $filename;
     }
@@ -68,7 +36,7 @@ final class BackupService
             return [];
         }
 
-        $files = glob($dir . '/backup-*.sql') ?: [];
+        $files = glob($dir . '/backup-*.sqlite') ?: [];
         $result = [];
         foreach ($files as $file) {
             $result[] = ['name' => basename($file), 'size' => filesize($file), 'created_at' => filemtime($file)];
@@ -82,12 +50,15 @@ final class BackupService
     public function restore(string $filename): void
     {
         $path = $this->safePath($filename);
-        $sql = file_get_contents($path);
-        if ($sql === false) {
-            throw new \RuntimeException('Could not read backup file.');
-        }
+        $dbPath = (string) config('db.path');
 
-        Database::pdo()->exec($sql);
+        // Each HTTP request gets a fresh Database singleton (PHP's static
+        // state doesn't persist across requests under Apache/PHP-FPM), so
+        // overwriting the live file here is safe for every request after
+        // this one — nothing later in *this* request touches the database.
+        if (!copy($path, $dbPath)) {
+            throw new \RuntimeException('Could not restore backup file.');
+        }
     }
 
     public function pathFor(string $filename): string
@@ -100,7 +71,7 @@ final class BackupService
         $filename = basename($filename); // strip any path traversal attempt
         $path = storage_path('backups/' . $filename);
 
-        if (!is_file($path) || !str_starts_with($filename, 'backup-') || !str_ends_with($filename, '.sql')) {
+        if (!is_file($path) || !str_starts_with($filename, 'backup-') || !str_ends_with($filename, '.sqlite')) {
             throw new \RuntimeException('Backup file not found.');
         }
 

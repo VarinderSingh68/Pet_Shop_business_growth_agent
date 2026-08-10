@@ -7,20 +7,20 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE api_tokens (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                user_id INT UNSIGNED NOT NULL,
-                name VARCHAR(150) NOT NULL,
-                token_hash VARCHAR(64) NOT NULL,
-                last_four VARCHAR(4) NOT NULL,
-                last_used_at DATETIME NULL,
-                rate_limit_per_minute INT UNSIGNED NOT NULL DEFAULT 60,
-                revoked_at DATETIME NULL,
-                created_at DATETIME NOT NULL,
-                UNIQUE KEY api_tokens_token_hash_unique (token_hash),
-                KEY api_tokens_user_id_index (user_id),
-                CONSTRAINT api_tokens_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INT NOT NULL,
+            name VARCHAR(150) NOT NULL,
+            token_hash VARCHAR(64) NOT NULL,
+            last_four VARCHAR(4) NOT NULL,
+            last_used_at DATETIME NULL,
+            rate_limit_per_minute INT NOT NULL DEFAULT 60,
+            revoked_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            CONSTRAINT api_tokens_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
         SQL);
+        $pdo->exec('CREATE UNIQUE INDEX api_tokens_token_hash_unique ON api_tokens(token_hash)');
+        $pdo->exec('CREATE INDEX api_tokens_user_id_index ON api_tokens(user_id)');
     }
 
     public function down(PDO $pdo): void

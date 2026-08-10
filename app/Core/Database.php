@@ -24,12 +24,13 @@ final class Database
 
     private function __construct()
     {
-        $dsn = sprintf(
-            'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
-            config('db.host'),
-            config('db.port'),
-            config('db.database'),
-        );
+        $path = (string) config('db.path');
+        $dir = dirname($path);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        $dsn = 'sqlite:' . $path;
 
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -37,15 +38,20 @@ final class Database
             PDO::ATTR_EMULATE_PREPARES => false,
         ];
 
-        // Managed MySQL providers (Aiven, PlanetScale, etc.) require TLS.
-        // Local/shared-hosting MySQL doesn't set DB_SSL_CA, so this is a no-op there.
-        $sslCa = config('db.ssl_ca');
-        if (is_string($sslCa) && $sslCa !== '') {
-            $options[PDO::MYSQL_ATTR_SSL_CA] = $sslCa;
-            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
-        }
+        $this->pdo = new PDO($dsn, null, null, $options);
 
-        $this->pdo = new PDO($dsn, config('db.username'), config('db.password'), $options);
+        // SQLite disables foreign-key enforcement per-connection by default.
+        $this->pdo->exec('PRAGMA foreign_keys = ON');
+
+        // WAL lets readers and writers proceed concurrently instead of
+        // blocking on the default rollback-journal locking, and the busy
+        // timeout makes a PHP process wait out a brief lock instead of
+        // failing immediately — both matter once more than one request can
+        // be in flight against the same file at once (multiple visitors in
+        // production, or even the dev server handling overlapping requests
+        // for a page plus its assets).
+        $this->pdo->exec('PRAGMA journal_mode = WAL');
+        $this->pdo->exec('PRAGMA busy_timeout = 5000');
 
         $this->profiling = (bool) config('app.debug');
     }

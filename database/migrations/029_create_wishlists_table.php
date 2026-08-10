@@ -7,15 +7,15 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE wishlists (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                user_id INT UNSIGNED NOT NULL,
-                product_id INT UNSIGNED NOT NULL,
-                created_at DATETIME NOT NULL,
-                UNIQUE KEY wishlists_user_product_unique (user_id, product_id),
-                CONSTRAINT wishlists_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                CONSTRAINT wishlists_product_fk FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INT NOT NULL,
+            product_id INT NOT NULL,
+            created_at DATETIME NOT NULL,
+            CONSTRAINT wishlists_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            CONSTRAINT wishlists_product_fk FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+            )
         SQL);
+        $pdo->exec('CREATE UNIQUE INDEX wishlists_user_product_unique ON wishlists(user_id, product_id)');
     }
 
     public function down(PDO $pdo): void

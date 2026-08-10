@@ -7,16 +7,16 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE newsletter_subscribers (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                email VARCHAR(191) NOT NULL,
-                status ENUM('subscribed','unsubscribed') NOT NULL DEFAULT 'subscribed',
-                unsubscribe_token VARCHAR(64) NOT NULL,
-                created_at DATETIME NOT NULL,
-                updated_at DATETIME NOT NULL,
-                UNIQUE KEY newsletter_subscribers_email_unique (email),
-                UNIQUE KEY newsletter_subscribers_token_unique (unsubscribe_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(191) NOT NULL,
+            status TEXT NOT NULL DEFAULT 'subscribed' CHECK (status IN ('subscribed','unsubscribed')),
+            unsubscribe_token VARCHAR(64) NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL
+            )
         SQL);
+        $pdo->exec('CREATE UNIQUE INDEX newsletter_subscribers_email_unique ON newsletter_subscribers(email)');
+        $pdo->exec('CREATE UNIQUE INDEX newsletter_subscribers_token_unique ON newsletter_subscribers(unsubscribe_token)');
     }
 
     public function down(PDO $pdo): void

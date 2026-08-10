@@ -7,24 +7,24 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE customer_scores (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                user_id INT UNSIGNED NOT NULL,
-                recency_days INT UNSIGNED NULL COMMENT 'Days since last order',
-                frequency_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Orders in the last 365 days',
-                monetary_paise INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total spend in the last 365 days',
-                recency_score TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '1-5, 5 = most recent',
-                frequency_score TINYINT UNSIGNED NOT NULL DEFAULT 1,
-                monetary_score TINYINT UNSIGNED NOT NULL DEFAULT 1,
-                rfm_total TINYINT UNSIGNED NOT NULL DEFAULT 3,
-                avg_order_interval_days INT UNSIGNED NULL COMMENT 'Mean days between this customer''s own orders',
-                predicted_next_order_date DATE NULL,
-                churn_risk ENUM('low','medium','high') NOT NULL DEFAULT 'low',
-                calculated_at DATETIME NOT NULL,
-                UNIQUE KEY customer_scores_user_unique (user_id),
-                KEY customer_scores_churn_risk_index (churn_risk),
-                CONSTRAINT customer_scores_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INT NOT NULL,
+            recency_days INT NULL,
+            frequency_count INT NOT NULL DEFAULT 0,
+            monetary_paise INT NOT NULL DEFAULT 0,
+            recency_score INTEGER NOT NULL DEFAULT 1,
+            frequency_score INTEGER NOT NULL DEFAULT 1,
+            monetary_score INTEGER NOT NULL DEFAULT 1,
+            rfm_total INTEGER NOT NULL DEFAULT 3,
+            avg_order_interval_days INT NULL,
+            predicted_next_order_date DATE NULL,
+            churn_risk TEXT NOT NULL DEFAULT 'low' CHECK (churn_risk IN ('low','medium','high')),
+            calculated_at DATETIME NOT NULL,
+            CONSTRAINT customer_scores_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
         SQL);
+        $pdo->exec('CREATE UNIQUE INDEX customer_scores_user_unique ON customer_scores(user_id)');
+        $pdo->exec('CREATE INDEX customer_scores_churn_risk_index ON customer_scores(churn_risk)');
     }
 
     public function down(PDO $pdo): void

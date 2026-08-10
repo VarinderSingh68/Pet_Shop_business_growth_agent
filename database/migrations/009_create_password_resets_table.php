@@ -7,15 +7,15 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE password_resets (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                email VARCHAR(191) NOT NULL,
-                token_hash VARCHAR(255) NOT NULL,
-                expires_at DATETIME NOT NULL,
-                used_at DATETIME NULL,
-                created_at DATETIME NOT NULL,
-                KEY password_resets_email_index (email)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(191) NOT NULL,
+            token_hash VARCHAR(255) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            used_at DATETIME NULL,
+            created_at DATETIME NOT NULL
+            )
         SQL);
+        $pdo->exec('CREATE INDEX password_resets_email_index ON password_resets(email)');
     }
 
     public function down(PDO $pdo): void

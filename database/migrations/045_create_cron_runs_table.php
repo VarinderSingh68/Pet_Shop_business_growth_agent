@@ -7,18 +7,18 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE cron_runs (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                job_name VARCHAR(100) NOT NULL,
-                started_at DATETIME NOT NULL,
-                finished_at DATETIME NULL,
-                duration_ms INT UNSIGNED NULL,
-                outcome ENUM('success','failed') NULL,
-                summary VARCHAR(500) NULL,
-                error TEXT NULL,
-                KEY cron_runs_job_name_index (job_name),
-                KEY cron_runs_started_at_index (started_at)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_name VARCHAR(100) NOT NULL,
+            started_at DATETIME NOT NULL,
+            finished_at DATETIME NULL,
+            duration_ms INT NULL,
+            outcome TEXT NULL CHECK (outcome IN ('success','failed')),
+            summary VARCHAR(500) NULL,
+            error TEXT NULL
+            )
         SQL);
+        $pdo->exec('CREATE INDEX cron_runs_job_name_index ON cron_runs(job_name)');
+        $pdo->exec('CREATE INDEX cron_runs_started_at_index ON cron_runs(started_at)');
     }
 
     public function down(PDO $pdo): void

@@ -7,16 +7,16 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE slow_queries (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                sql_text TEXT NOT NULL,
-                bindings JSON NULL,
-                duration_ms DECIMAL(10,2) NOT NULL,
-                request_path VARCHAR(255) NULL,
-                created_at DATETIME NOT NULL,
-                KEY slow_queries_duration_index (duration_ms),
-                KEY slow_queries_created_at_index (created_at)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sql_text TEXT NOT NULL,
+            bindings JSON NULL,
+            duration_ms DECIMAL(10,2) NOT NULL,
+            request_path VARCHAR(255) NULL,
+            created_at DATETIME NOT NULL
+            )
         SQL);
+        $pdo->exec('CREATE INDEX slow_queries_duration_index ON slow_queries(duration_ms)');
+        $pdo->exec('CREATE INDEX slow_queries_created_at_index ON slow_queries(created_at)');
     }
 
     public function down(PDO $pdo): void

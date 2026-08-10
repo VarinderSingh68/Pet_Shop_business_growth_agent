@@ -25,18 +25,6 @@ services:
         value: INR
       - key: APP_CURRENCY_SYMBOL
         value: "₹"
-      - key: DB_HOST
-        sync: false
-      - key: DB_PORT
-        value: "3306"
-      - key: DB_DATABASE
-        sync: false
-      - key: DB_USERNAME
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
-      - key: DB_SSL_CA
-        value: /etc/secrets/ca.pem
       - key: MAIL_MODE
         value: log
       - key: MAIL_HOST

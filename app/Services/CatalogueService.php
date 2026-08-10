@@ -54,12 +54,13 @@ final class CatalogueService
             $bindings[] = $filters['stage'];
         }
 
-        $matchClause = '';
-        if (!empty($filters['q'])) {
-            $matchClause = 'MATCH(p.name, p.short_description, p.description) AGAINST (? IN NATURAL LANGUAGE MODE)';
-            $where[] = "({$matchClause} OR p.name LIKE ?)";
-            $bindings[] = (string) $filters['q'];
-            $bindings[] = '%' . $filters['q'] . '%';
+        $searchActive = !empty($filters['q']);
+        if ($searchActive) {
+            $like = '%' . $filters['q'] . '%';
+            $where[] = '(p.name LIKE ? OR p.short_description LIKE ? OR p.description LIKE ?)';
+            $bindings[] = $like;
+            $bindings[] = $like;
+            $bindings[] = $like;
         }
 
         $whereSql = implode(' AND ', $where);
@@ -90,7 +91,7 @@ final class CatalogueService
             'price_desc' => 'min_price_paise DESC',
             'rating' => 'p.avg_rating DESC, p.review_count DESC',
             'newest' => 'p.created_at DESC',
-            'relevance' => $matchClause !== '' ? "{$matchClause} DESC" : 'p.is_featured DESC, p.created_at DESC',
+            'relevance' => $searchActive ? '(p.name LIKE ?) DESC, p.is_featured DESC, p.review_count DESC' : 'p.is_featured DESC, p.created_at DESC',
         ];
         $sortKey = is_string($filters['sort'] ?? null) && isset($sortMap[$filters['sort']]) ? $filters['sort'] : 'newest';
         $orderSql = $sortMap[$sortKey];
@@ -99,13 +100,10 @@ final class CatalogueService
         $perPage = self::PER_PAGE;
         $offset = ($page - 1) * $perPage;
 
-        $selectMatch = $matchClause !== '' ? ", {$matchClause} AS relevance" : '';
-
         $sql = "SELECT p.*, b.name AS brand_name, b.slug AS brand_slug,
                        MIN(v.price_paise) AS min_price_paise,
                        MAX(v.compare_at_price_paise) AS compare_at_price_paise,
                        COALESCE(SUM(v.stock_quantity), 0) AS total_stock
-                       {$selectMatch}
                 FROM products p
                 LEFT JOIN brands b ON b.id = p.brand_id
                 JOIN product_variants v ON v.product_id = p.id AND v.deleted_at IS NULL
@@ -115,9 +113,11 @@ final class CatalogueService
                 ORDER BY {$orderSql}
                 LIMIT {$perPage} OFFSET {$offset}";
 
-        // Relevance-sort binds the MATCH() twice (SELECT + WHERE); the rest bind once each.
-        $selectBindings = $matchClause !== '' ? [(string) $filters['q']] : [];
-        $allBindings = [...$selectBindings, ...$bindings, ...$havingBindings];
+        // ORDER BY comes after WHERE/HAVING in the final SQL, so its bind
+        // (only present for the relevance sort's prefix-match check) must
+        // be appended last, not first.
+        $orderBindings = ($sortKey === 'relevance' && $searchActive) ? [$filters['q'] . '%'] : [];
+        $allBindings = [...$bindings, ...$havingBindings, ...$orderBindings];
 
         $items = $db->select($sql, $allBindings);
 

@@ -7,20 +7,20 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE growth_actions (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                action_type VARCHAR(50) NOT NULL COMMENT 'e.g. abandoned_cart, replenishment, winback, birthday, copilot_suggestion',
-                target_type VARCHAR(50) NULL,
-                target_id INT UNSIGNED NULL,
-                explanation VARCHAR(500) NOT NULL COMMENT 'Plain-English reason, shown in admin',
-                affected_count INT UNSIGNED NULL,
-                estimated_impact_paise INT UNSIGNED NULL,
-                status ENUM('suggested','executed','dismissed') NOT NULL DEFAULT 'executed',
-                executed_at DATETIME NULL,
-                created_at DATETIME NOT NULL,
-                KEY growth_actions_action_type_index (action_type),
-                KEY growth_actions_created_at_index (created_at)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            action_type VARCHAR(50) NOT NULL,
+            target_type VARCHAR(50) NULL,
+            target_id INT NULL,
+            explanation VARCHAR(500) NOT NULL,
+            affected_count INT NULL,
+            estimated_impact_paise INT NULL,
+            status TEXT NOT NULL DEFAULT 'executed' CHECK (status IN ('suggested','executed','dismissed')),
+            executed_at DATETIME NULL,
+            created_at DATETIME NOT NULL
+            )
         SQL);
+        $pdo->exec('CREATE INDEX growth_actions_action_type_index ON growth_actions(action_type)');
+        $pdo->exec('CREATE INDEX growth_actions_created_at_index ON growth_actions(created_at)');
     }
 
     public function down(PDO $pdo): void

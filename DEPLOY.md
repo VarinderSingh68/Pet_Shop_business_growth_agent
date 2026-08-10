@@ -1,105 +1,80 @@
 # Deploying to Render
 
-This app now ships with everything Render needs: a `Dockerfile` (Render has no
-native PHP runtime, so it builds and runs this app as a container), a
-`render.yaml` Blueprint (defines the web service), and TLS support in the
-database layer for a managed MySQL provider.
+This app ships with everything Render needs: a `Dockerfile` (Render has no
+native PHP runtime, so it builds and runs this app as a container) and a
+`render.yaml` Blueprint that defines the web service.
+
+The database is a single **SQLite file** inside the container (`storage/database.sqlite`)
+— no external database service, no signups, no connection credentials of any
+kind. The container automatically runs migrations and seeds fresh demo data
+on every boot (see "How the database works on Render" below for what that
+means in practice).
 
 Render's native Cron Job service type requires a paid plan (no free tier), so
 the Growth Agent runs via a secret-protected HTTP endpoint
 (`GET /api/v1/cron/run?secret=...`) instead of `php cron.php` on a schedule —
-step 8 below wires up a free external scheduler to call it every 15 minutes.
+step 5 below wires up a free external scheduler to call it every 15 minutes.
 
-Render doesn't offer managed MySQL, so this guide uses **Aiven's free MySQL
-tier** (genuinely free, no card required, no time limit) for the database.
+## 1. Generate an APP_KEY
 
-## 1. Create the database (Aiven)
-
-1. Sign up at [aiven.io](https://aiven.io) (no credit card needed for the free plan).
-2. Create a new service → **MySQL** → pick the **Free** plan → choose any region → create.
-3. Once it's provisioning, open the service's **Overview** tab and note:
-   - `Host`
-   - `Port`
-   - `User` (usually `avnadmin`)
-   - `Password`
-   - `Default database name` (usually `defaultdb`)
-4. On the same Overview page, download the **CA Certificate** (`ca.pem`) — Aiven requires TLS, and you'll need this file in two places (Render, and your own machine for running migrations).
-
-## 2. Generate an APP_KEY
-
-Run this locally and save the output — you'll paste it into Render in step 4:
+Run this locally and save the output — you'll paste it into Render in step 3:
 
 ```bash
 php -r "echo base64_encode(random_bytes(32));"
 ```
 
-## 3. Push the deployment files to GitHub
+## 2. Push the deployment files to GitHub
 
-These files were just added to your project: `Dockerfile`, `docker/entrypoint.sh`, `.dockerignore`, `.gitattributes`, `render.yaml`, plus small code changes (`app/Core/Database.php`, `config/config.php`, `.env.example`, `app/Controllers/Api/CronController.php`, `routes/api.php`) to support TLS to Aiven and the HTTP cron trigger. Commit and push them — Render reads `render.yaml` directly from your repo.
+If you haven't already, commit and push `Dockerfile`, `docker/entrypoint.sh`,
+`.dockerignore`, `.gitattributes`, `render.yaml`, and `DEPLOY.md`. Render reads
+`render.yaml` directly from your repo.
 
 ```bash
-git add Dockerfile docker/ .dockerignore .gitattributes render.yaml app/Core/Database.php config/config.php .env.example app/Controllers/Api/CronController.php routes/api.php DEPLOY.md
+git add Dockerfile docker/ .dockerignore .gitattributes render.yaml DEPLOY.md
 git commit -m "Add Docker/Render deployment setup"
 git push
 ```
 
-## 4. Deploy the Blueprint on Render
+## 3. Deploy the Blueprint on Render
 
 1. Sign up at [render.com](https://render.com) and connect your GitHub account.
-2. **New +** → **Blueprint** → select your `Pet_Shop_business_growth_agent` repo. Render will detect `render.yaml` and show the `happy-tails-pet-shop` web service.
+2. **New +** → **Blueprint** → select your repo. Render detects `render.yaml`
+   and shows the `happy-tails-pet-shop` web service.
 3. It'll prompt you for every variable marked `sync: false`. Fill in:
-   - `APP_URL` — leave as `https://happy-tails-pet-shop.onrender.com` for now (or whatever Render shows as the planned URL); you'll confirm/fix this in step 6 once the real URL is assigned.
-   - `APP_KEY` — the value from step 2.
-   - `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` — from Aiven (step 1). `DB_PORT` is already set to `3306` as a default — **check Aiven's actual port** (managed MySQL providers often use a non-default port) and correct it if needed.
-   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — leave blank for now if you're not setting up Google sign-in immediately.
-   - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` — leave blank; the storefront cleanly falls back to COD-only checkout without them.
-   - `MAIL_HOST` / `MAIL_USERNAME` / `MAIL_PASSWORD` / `MAIL_FROM_ADDRESS` — leave blank if you haven't set up SMTP yet; `MAIL_MODE=log` means emails just get written to the in-app Mail Log instead of failing.
-4. Click **Apply**. Render builds the Docker image and starts the service — the first build takes a few minutes (compiling PHP extensions).
+   - `APP_URL` — leave as the suggested `*.onrender.com` URL for now; you'll
+     confirm/fix this in step 4 once the real URL is assigned.
+   - `APP_KEY` — the value from step 1.
+   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — leave blank if you're not
+     setting up Google sign-in immediately.
+   - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` —
+     leave blank; the storefront cleanly falls back to COD-only checkout.
+   - `MAIL_HOST` / `MAIL_USERNAME` / `MAIL_PASSWORD` / `MAIL_FROM_ADDRESS` —
+     leave blank if you haven't set up SMTP; `MAIL_MODE=log` writes emails to
+     the in-app Mail Log instead of failing.
+4. Click **Apply**. Render builds the Docker image and starts the service —
+   the first build takes a few minutes (compiling PHP extensions). The
+   container's entrypoint automatically runs migrations and seeds demo data
+   on this first boot, so there's no separate database-setup step.
 
-## 5. Add the Aiven CA certificate as a Secret File
+## 4. Fix APP_URL
 
-The database connection needs Aiven's `ca.pem` at runtime.
+Once the web service finishes its first deploy, Render shows its real URL at
+the top of the service page (e.g. `https://happy-tails-pet-shop.onrender.com`).
+Go to **Environment** → set `APP_URL` to that exact URL (no trailing slash) →
+save (this triggers a redeploy).
 
-1. On the `happy-tails-pet-shop` service → **Environment** tab → **Secret Files** → **Add Secret File**.
-2. Filename: `ca.pem`. Contents: paste the full contents of the `ca.pem` you downloaded from Aiven in step 1.
-3. `DB_SSL_CA` is already set to `/etc/secrets/ca.pem` in `render.yaml` — that's exactly where Render places this file, so no further change needed.
+## 5. Verify and get your login credentials
 
-## 6. Fix APP_URL
+Visit your Render URL — you should see the storefront homepage. To sign in to
+`/admin`, you need the owner credentials the seeder generated during boot —
+open the service's **Logs** tab in the Render dashboard and search for
+`Created owner:` — that log line has the email and password (regenerated
+fresh on every boot, so re-check the logs if you ever redeploy and forget it).
 
-Once the web service finishes its first deploy, Render shows its real URL at the top of the service page (e.g. `https://happy-tails-pet-shop.onrender.com`). Go to **Environment** → set `APP_URL` to that exact URL (no trailing slash) → save (this triggers a redeploy).
+## 6. Schedule the Growth Agent (free)
 
-## 7. Run migrations and seed data
-
-Render's free tier doesn't support the "pre-deploy command" feature, so run migrations from your own machine, pointed at the Aiven database directly:
-
-```bash
-# In your local project directory, temporarily export the Aiven credentials
-# (use the same values you put into Render in step 4):
-export DB_HOST=your-aiven-host
-export DB_PORT=your-aiven-port
-export DB_DATABASE=defaultdb
-export DB_USERNAME=avnadmin
-export DB_PASSWORD=your-aiven-password
-export DB_SSL_CA=/path/to/your/downloaded/ca.pem
-
-php database/migrate.php fresh --seed
-```
-
-This creates every table and seeds demo products, customers, and services —
-and **prints the owner/admin login credentials to your terminal**. Copy them
-now; they're shown once. (On Windows PowerShell, use `$env:DB_HOST = "..."`
-instead of `export`.)
-
-## 8. Verify
-
-Visit your Render URL. You should see the storefront homepage. Sign in to
-`/admin` with the credentials step 7 printed.
-
-## 9. Schedule the Growth Agent (free)
-
-The web service has a `CRON_SECRET` value Render auto-generated during setup
-(`render.yaml` has `generateValue: true` for it). Find it under the service's
-**Environment** tab, then point a free external scheduler at:
+Copy the auto-generated `CRON_SECRET` from the service's **Environment** tab,
+then point a free external scheduler at:
 
 ```
 https://<your-render-url>/api/v1/cron/run?secret=<CRON_SECRET>
@@ -115,19 +90,35 @@ repo.
 You can also trigger a run manually any time from **Admin → Developer tools →
 Cron monitor** while signed in, or by visiting that URL directly yourself.
 
+## How the database works on Render
+
+Render's free tier has no persistent disk, so anything written to the
+container's filesystem — including `storage/database.sqlite` — is wiped on
+every redeploy or restart. Rather than fight that, the entrypoint script
+leans into it: **every container boot re-runs `php database/migrate.php fresh
+--seed`**, so the live site always comes back with a clean, fully-seeded demo
+database automatically. No manual migration step, ever.
+
+The tradeoff: anything a real visitor does on the live site — placing an
+order, an admin editing a product, a new signup — is **not durable**. It
+survives until the next redeploy or the free-tier instance restarts (which
+also happens after 15 minutes of inactivity), then resets to the seeded demo
+state. For a portfolio/demo deployment this is usually a feature, not a bug —
+the site is always in a clean, working state for whoever looks at it next.
+
+If you need real data to persist, the fix is a paid Render instance with a
+persistent disk mounted at `storage/`, and setting `DB_AUTO_SEED=false` in
+the environment so the entrypoint stops re-seeding over your real data on
+every boot.
+
 ## Known limitations on the free tier
 
 - **Cold starts**: the web service spins down after 15 minutes idle and takes
   ~30-60s to wake up on the next visit. Your external cron pings every 15
   minutes will incidentally keep it warm most of the time.
-- **No persistent disk**: anything written to `storage/` (product images
-  uploaded through the admin panel, log files, DB backups made via the admin
-  backup tool) is wiped on every redeploy or restart. The demo product images
-  already committed to the repo are baked into the image and are fine — this
-  only affects *new* uploads made after deployment. If this becomes a real
-  problem, the fix is either a paid Render instance with a persistent disk
-  mounted at `storage/uploads`, or switching image storage to S3-compatible
-  object storage — neither is set up yet.
+- **No persistent disk**: see above — this also affects product images
+  uploaded through the admin panel after deployment (the demo product images
+  already committed to the repo are baked into the image and are unaffected).
 
 ## Updating Google OAuth / Razorpay later
 

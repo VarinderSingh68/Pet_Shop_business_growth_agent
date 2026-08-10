@@ -1,13 +1,12 @@
 # Happy Tails Pet Store
 
-A pet shop storefront, admin panel, and Growth Agent marketing engine — hand-rolled PHP MVC (no framework), MySQL, server-rendered views with Tailwind CDN and Alpine.js. Built to deploy on plain shared hosting.
+A pet shop storefront, admin panel, and Growth Agent marketing engine — hand-rolled PHP MVC (no framework), SQLite, server-rendered views with Tailwind CDN and Alpine.js. Built to deploy anywhere PHP runs, including plain shared hosting — the whole database is a single file, no separate database server to install or configure.
 
-See [DESIGN.md](DESIGN.md) for the visual design plan, [SCHEMA.md](SCHEMA.md) for the database schema and ERD, and [API.md](API.md) for the REST API reference.
+See [DESIGN.md](DESIGN.md) for the visual design plan, [SCHEMA.md](SCHEMA.md) for the database schema and ERD, [API.md](API.md) for the REST API reference, and [DEPLOY.md](DEPLOY.md) for deploying to Render.
 
 ## Requirements
 
-- PHP 8.2+ with `pdo_mysql`, `mbstring`, `gd`, `fileinfo`, `curl`, `openssl` extensions
-- MySQL 8 or MariaDB 10.6+
+- PHP 8.2+ with `pdo_sqlite`, `mbstring`, `gd`, `fileinfo`, `curl`, `openssl` extensions
 - Composer
 
 ## Setup
@@ -17,13 +16,13 @@ composer install
 cp .env.example .env
 ```
 
-Edit `.env` with your database credentials and a generated `APP_KEY`:
+Edit `.env` with a generated `APP_KEY` (no database credentials needed — the database is a SQLite file created automatically at `storage/database.sqlite`):
 
 ```bash
 php -r "echo base64_encode(random_bytes(32));"   # paste into APP_KEY
 ```
 
-Create the database, then run migrations and seed demo data:
+Run migrations and seed demo data:
 
 ```bash
 php database/migrate.php fresh --seed
@@ -83,7 +82,7 @@ Printed once at the end of seeding. If you lose them, reset with:
 php database/migrate.php fresh --seed
 ```
 
-(This drops and rebuilds the entire database — only use it in development.)
+(This drops and rebuilds the entire database — only use it in development. In production it's a single SQLite file, so backing it up is just copying `storage/database.sqlite`, or use **Admin → Developer tools → Backups** which does this for you.)
 
 ## Developer tools
 
@@ -108,7 +107,7 @@ database/
   migrations/    Numbered, each with up()/down()
   seeds/         Numbered, idempotent (safe to re-run)
 routes/          web.php, admin.php, api.php
-storage/         logs/, cache/, backups/, uploads/ (outside the web root — served via a controller)
+storage/         database.sqlite (the whole database), logs/, cache/, backups/, uploads/ (outside the web root — served via a controller)
 cron.php         Growth Agent worker entry point
 ```
 

@@ -19,12 +19,12 @@ final class DashboardController extends Controller
     {
         $db = Database::instance();
 
-        $revenueToday = $this->revenueSince($db, 'CURDATE()');
-        $revenueWeek = $this->revenueSince($db, 'DATE_SUB(CURDATE(), INTERVAL 7 DAY)');
-        $revenueMonth = $this->revenueSince($db, 'DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
+        $revenueToday = $this->revenueSince($db, "date('now')");
+        $revenueWeek = $this->revenueSince($db, "date('now', '-7 days')");
+        $revenueMonth = $this->revenueSince($db, "date('now', '-30 days')");
         $revenuePrevMonth = (int) ($db->selectOne(
             "SELECT COALESCE(SUM(total_paise),0) AS r FROM orders
-             WHERE status NOT IN ('cancelled') AND placed_at >= DATE_SUB(CURDATE(), INTERVAL 60 DAY) AND placed_at < DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+             WHERE status NOT IN ('cancelled') AND placed_at >= date('now', '-60 days') AND placed_at < date('now', '-30 days')",
         )['r'] ?? 0);
 
         $ordersByStatus = $db->select(
@@ -44,13 +44,13 @@ final class DashboardController extends Controller
              JOIN services s ON s.id = a.service_id
              JOIN staff_members sm ON sm.id = a.staff_id
              JOIN service_slots sl ON sl.id = a.slot_id
-             WHERE DATE(sl.start_at) = CURDATE() AND a.status IN ('booked','confirmed')
+             WHERE DATE(sl.start_at) = date('now') AND a.status IN ('booked','confirmed')
              ORDER BY sl.start_at ASC",
         );
 
         $newCustomers7d = (int) ($db->selectOne(
             "SELECT COUNT(*) c FROM users u JOIN roles r ON r.id = u.role_id
-             WHERE r.slug = 'customer' AND u.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)",
+             WHERE r.slug = 'customer' AND u.created_at >= datetime('now', '-7 days')",
         )['c'] ?? 0);
 
         $topProducts = $db->select(
@@ -58,7 +58,7 @@ final class DashboardController extends Controller
              FROM order_items oi
              JOIN orders o ON o.id = oi.order_id
              JOIN products p ON p.id = oi.product_id
-             WHERE o.status NOT IN ('cancelled') AND o.placed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+             WHERE o.status NOT IN ('cancelled') AND o.placed_at >= datetime('now', '-30 days')
              GROUP BY p.id, p.name, p.slug
              ORDER BY revenue_paise DESC
              LIMIT 5",
@@ -95,7 +95,7 @@ final class DashboardController extends Controller
     {
         $rows = $db->select(
             "SELECT DATE(placed_at) AS d, COALESCE(SUM(total_paise),0) AS r
-             FROM orders WHERE status NOT IN ('cancelled') AND placed_at >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
+             FROM orders WHERE status NOT IN ('cancelled') AND placed_at >= date('now', '-' || :days || ' days')
              GROUP BY DATE(placed_at)",
             ['days' => $days - 1],
         );
@@ -121,11 +121,11 @@ final class DashboardController extends Controller
     private function conversionFunnel(Database $db): array
     {
         $carts = (int) ($db->selectOne(
-            "SELECT COUNT(DISTINCT cart_id) c FROM cart_items ci WHERE ci.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)",
+            "SELECT COUNT(DISTINCT cart_id) c FROM cart_items ci WHERE ci.created_at >= datetime('now', '-30 days')",
         )['c'] ?? 0);
 
         $orders = (int) ($db->selectOne(
-            "SELECT COUNT(*) c FROM orders WHERE placed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND status != 'cancelled'",
+            "SELECT COUNT(*) c FROM orders WHERE placed_at >= datetime('now', '-30 days') AND status != 'cancelled'",
         )['c'] ?? 0);
 
         return ['carts' => $carts, 'orders' => $orders];

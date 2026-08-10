@@ -7,20 +7,20 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE staff_members (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                user_id INT UNSIGNED NULL,
-                name VARCHAR(150) NOT NULL,
-                title VARCHAR(100) NULL,
-                bio VARCHAR(500) NULL,
-                photo_path VARCHAR(255) NULL,
-                working_hours JSON NULL COMMENT 'Per-weekday start/end, e.g. {"mon":["10:00","18:00"], ...}',
-                is_active TINYINT(1) NOT NULL DEFAULT 1,
-                created_at DATETIME NOT NULL,
-                updated_at DATETIME NOT NULL,
-                KEY staff_members_user_id_index (user_id),
-                CONSTRAINT staff_members_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INT NULL,
+            name VARCHAR(150) NOT NULL,
+            title VARCHAR(100) NULL,
+            bio VARCHAR(500) NULL,
+            photo_path VARCHAR(255) NULL,
+            working_hours JSON NULL,
+            is_active INTEGER NOT NULL DEFAULT 1,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            CONSTRAINT staff_members_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+            )
         SQL);
+        $pdo->exec('CREATE INDEX staff_members_user_id_index ON staff_members(user_id)');
     }
 
     public function down(PDO $pdo): void

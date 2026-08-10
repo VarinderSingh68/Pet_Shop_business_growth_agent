@@ -7,15 +7,15 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE permissions (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(150) NOT NULL,
-                slug VARCHAR(150) NOT NULL,
-                `group` VARCHAR(100) NOT NULL DEFAULT 'general',
-                created_at DATETIME NOT NULL,
-                updated_at DATETIME NOT NULL,
-                UNIQUE KEY permissions_slug_unique (slug)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(150) NOT NULL,
+            slug VARCHAR(150) NOT NULL,
+            `group` VARCHAR(100) NOT NULL DEFAULT 'general',
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL
+            )
         SQL);
+        $pdo->exec('CREATE UNIQUE INDEX permissions_slug_unique ON permissions(slug)');
     }
 
     public function down(PDO $pdo): void

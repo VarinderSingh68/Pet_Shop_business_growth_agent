@@ -28,7 +28,7 @@ final class Subscription extends Model
     public static function due(): array
     {
         return static::db()->select(
-            "SELECT * FROM subscriptions WHERE status = 'active' AND next_order_date <= CURDATE()",
+            "SELECT * FROM subscriptions WHERE status = 'active' AND next_order_date <= date('now')",
         );
     }
 }

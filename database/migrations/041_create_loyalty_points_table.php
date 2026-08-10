@@ -7,20 +7,20 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE loyalty_points (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                user_id INT UNSIGNED NOT NULL,
-                points INT NOT NULL COMMENT 'Signed: positive = earned, negative = redeemed/expired',
-                type ENUM('earned','redeemed','expired','adjusted') NOT NULL,
-                reference_type VARCHAR(50) NULL,
-                reference_id INT UNSIGNED NULL,
-                note VARCHAR(255) NULL,
-                expires_at DATE NULL,
-                created_at DATETIME NOT NULL,
-                KEY loyalty_points_user_id_index (user_id),
-                KEY loyalty_points_expires_at_index (expires_at),
-                CONSTRAINT loyalty_points_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INT NOT NULL,
+            points INT NOT NULL,
+            type TEXT NOT NULL CHECK (type IN ('earned','redeemed','expired','adjusted')),
+            reference_type VARCHAR(50) NULL,
+            reference_id INT NULL,
+            note VARCHAR(255) NULL,
+            expires_at DATE NULL,
+            created_at DATETIME NOT NULL,
+            CONSTRAINT loyalty_points_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
         SQL);
+        $pdo->exec('CREATE INDEX loyalty_points_user_id_index ON loyalty_points(user_id)');
+        $pdo->exec('CREATE INDEX loyalty_points_expires_at_index ON loyalty_points(expires_at)');
     }
 
     public function down(PDO $pdo): void

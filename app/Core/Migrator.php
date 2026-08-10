@@ -20,11 +20,11 @@ final class Migrator
     {
         $this->pdo->exec(<<<SQL
             CREATE TABLE IF NOT EXISTS migrations (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 migration VARCHAR(191) NOT NULL,
-                batch INT UNSIGNED NOT NULL,
+                batch INTEGER NOT NULL,
                 run_at DATETIME NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            )
         SQL);
     }
 
@@ -76,8 +76,6 @@ final class Migrator
 
             $migration = require $file;
             try {
-                // Not wrapped in a transaction: MySQL DDL (CREATE/ALTER TABLE)
-                // triggers an implicit commit, which would break an explicit one.
                 $migration->up($this->pdo);
                 $stmt = $this->pdo->prepare('INSERT INTO migrations (migration, batch, run_at) VALUES (?, ?, ?)');
                 $stmt->execute([$name, $batch, now()]);
@@ -126,13 +124,15 @@ final class Migrator
 
     public function fresh(): array
     {
-        $tables = $this->pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+        $tables = $this->pdo->query(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+        )->fetchAll(PDO::FETCH_COLUMN);
 
-        $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+        $this->pdo->exec('PRAGMA foreign_keys = OFF');
         foreach ($tables as $table) {
-            $this->pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+            $this->pdo->exec("DROP TABLE IF EXISTS \"{$table}\"");
         }
-        $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+        $this->pdo->exec('PRAGMA foreign_keys = ON');
 
         $this->ensureMigrationsTable();
 

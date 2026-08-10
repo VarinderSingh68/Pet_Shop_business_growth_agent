@@ -7,16 +7,16 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE testimonials (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                customer_name VARCHAR(150) NOT NULL,
-                pet_description VARCHAR(150) NULL,
-                quote VARCHAR(500) NOT NULL,
-                rating TINYINT UNSIGNED NOT NULL DEFAULT 5,
-                is_published TINYINT(1) NOT NULL DEFAULT 1,
-                sort_order INT NOT NULL DEFAULT 0,
-                created_at DATETIME NOT NULL,
-                updated_at DATETIME NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_name VARCHAR(150) NOT NULL,
+            pet_description VARCHAR(150) NULL,
+            quote VARCHAR(500) NOT NULL,
+            rating INTEGER NOT NULL DEFAULT 5,
+            is_published INTEGER NOT NULL DEFAULT 1,
+            sort_order INT NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL
+            )
         SQL);
     }
 

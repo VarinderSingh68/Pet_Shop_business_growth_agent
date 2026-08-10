@@ -1,17 +1,20 @@
 FROM php:8.3-apache
 
 # System libraries needed by the PHP extensions below, plus curl/git/unzip
-# for Composer itself.
+# for Composer itself. The whole database is a single SQLite file (no
+# external DB server, no host/port/credentials) - just needs libsqlite3-dev
+# to build pdo_sqlite.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpng-dev \
         libjpeg62-turbo-dev \
         libfreetype6-dev \
         libzip-dev \
         libcurl4-openssl-dev \
+        libsqlite3-dev \
         unzip \
         git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" gd pdo_mysql mbstring curl fileinfo zip \
+    && docker-php-ext-install -j"$(nproc)" gd pdo_sqlite mbstring curl fileinfo zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 

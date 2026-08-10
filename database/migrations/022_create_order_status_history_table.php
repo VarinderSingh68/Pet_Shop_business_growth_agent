@@ -7,17 +7,17 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE order_status_history (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                order_id INT UNSIGNED NOT NULL,
-                status VARCHAR(30) NOT NULL,
-                note VARCHAR(255) NULL,
-                changed_by_user_id INT UNSIGNED NULL,
-                created_at DATETIME NOT NULL,
-                KEY order_status_history_order_id_index (order_id),
-                CONSTRAINT order_status_history_order_fk FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-                CONSTRAINT order_status_history_user_fk FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INT NOT NULL,
+            status VARCHAR(30) NOT NULL,
+            note VARCHAR(255) NULL,
+            changed_by_user_id INT NULL,
+            created_at DATETIME NOT NULL,
+            CONSTRAINT order_status_history_order_fk FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+            CONSTRAINT order_status_history_user_fk FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+            )
         SQL);
+        $pdo->exec('CREATE INDEX order_status_history_order_id_index ON order_status_history(order_id)');
     }
 
     public function down(PDO $pdo): void

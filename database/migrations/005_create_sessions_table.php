@@ -11,16 +11,16 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE sessions (
-                id VARCHAR(191) NOT NULL PRIMARY KEY,
-                user_id INT UNSIGNED NULL,
-                ip_address VARCHAR(45) NULL,
-                user_agent VARCHAR(255) NULL,
-                last_activity DATETIME NOT NULL,
-                created_at DATETIME NOT NULL,
-                KEY sessions_user_id_index (user_id),
-                CONSTRAINT sessions_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id VARCHAR(191) NOT NULL PRIMARY KEY,
+            user_id INT NULL,
+            ip_address VARCHAR(45) NULL,
+            user_agent VARCHAR(255) NULL,
+            last_activity DATETIME NOT NULL,
+            created_at DATETIME NOT NULL,
+            CONSTRAINT sessions_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
         SQL);
+        $pdo->exec('CREATE INDEX sessions_user_id_index ON sessions(user_id)');
     }
 
     public function down(PDO $pdo): void

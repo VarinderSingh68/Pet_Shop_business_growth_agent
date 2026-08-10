@@ -7,15 +7,15 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE roles (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                slug VARCHAR(100) NOT NULL,
-                description VARCHAR(255) NULL,
-                created_at DATETIME NOT NULL,
-                updated_at DATETIME NOT NULL,
-                UNIQUE KEY roles_slug_unique (slug)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(100) NOT NULL,
+            slug VARCHAR(100) NOT NULL,
+            description VARCHAR(255) NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL
+            )
         SQL);
+        $pdo->exec('CREATE UNIQUE INDEX roles_slug_unique ON roles(slug)');
     }
 
     public function down(PDO $pdo): void

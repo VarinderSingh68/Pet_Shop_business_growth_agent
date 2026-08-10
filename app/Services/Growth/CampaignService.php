@@ -143,7 +143,7 @@ final class CampaignService
         $pending = $db->select(
             "SELECT cr.id, cr.user_id, cr.sent_at FROM campaign_recipients cr
              WHERE cr.sent_at IS NOT NULL AND cr.converted_at IS NULL
-               AND cr.sent_at >= DATE_SUB(NOW(), INTERVAL " . (self::CONVERSION_WINDOW_DAYS + 1) . " DAY)",
+               AND cr.sent_at >= datetime('now', '-" . (self::CONVERSION_WINDOW_DAYS + 1) . " days')",
         );
 
         $converted = 0;
@@ -151,7 +151,7 @@ final class CampaignService
         foreach ($pending as $r) {
             $order = $db->selectOne(
                 "SELECT id, total_paise FROM orders
-                 WHERE user_id = :uid AND status != 'cancelled' AND placed_at BETWEEN :start AND DATE_ADD(:start2, INTERVAL " . self::CONVERSION_WINDOW_DAYS . " DAY)
+                 WHERE user_id = :uid AND status != 'cancelled' AND placed_at BETWEEN :start AND datetime(:start2, '+" . self::CONVERSION_WINDOW_DAYS . " days')
                  ORDER BY placed_at ASC LIMIT 1",
                 ['uid' => $r['user_id'], 'start' => $r['sent_at'], 'start2' => $r['sent_at']],
             );

@@ -242,7 +242,7 @@ final class AutomationService
             "SELECT pt.id AS pet_id, pt.name AS pet_name, pt.user_id, u.name AS user_name, u.email
              FROM pets pt JOIN users u ON u.id = pt.user_id
              WHERE pt.deleted_at IS NULL AND pt.birthday IS NOT NULL
-               AND MONTH(pt.birthday) = MONTH(CURDATE()) AND DAY(pt.birthday) = DAY(CURDATE())",
+               AND strftime('%m', pt.birthday) = strftime('%m', 'now') AND strftime('%d', pt.birthday) = strftime('%d', 'now')",
         );
         foreach ($birthdays as $pet) {
             if ($this->notifiedWithinDays((int) $pet['user_id'], 'birthday', 300, (int) $pet['pet_id'])) {
@@ -258,7 +258,7 @@ final class AutomationService
             "SELECT pt.id AS pet_id, pt.name AS pet_name, pt.species, pt.user_id, u.name AS user_name, u.email
              FROM pets pt JOIN users u ON u.id = pt.user_id
              WHERE pt.deleted_at IS NULL AND pt.species IN ('dog','cat') AND pt.birthday IS NOT NULL
-               AND pt.birthday BETWEEN DATE_SUB(CURDATE(), INTERVAL 380 DAY) AND DATE_SUB(CURDATE(), INTERVAL 350 DAY)",
+               AND pt.birthday BETWEEN date('now', '-380 days') AND date('now', '-350 days')",
         );
         foreach ($transitioning as $pet) {
             if ($this->notifiedWithinDays((int) $pet['user_id'], 'life_stage_transition', 400, (int) $pet['pet_id'])) {
@@ -310,7 +310,7 @@ final class AutomationService
     private function notifiedWithinDays(int $userId, string $type, int $days, ?int $relatedId = null): bool
     {
         $db = Database::instance();
-        $sql = "SELECT 1 AS x FROM notifications WHERE user_id = :uid AND type = :type AND status = 'sent' AND sent_at >= DATE_SUB(NOW(), INTERVAL {$days} DAY)";
+        $sql = "SELECT 1 AS x FROM notifications WHERE user_id = :uid AND type = :type AND status = 'sent' AND sent_at >= datetime('now', '-{$days} days')";
         $bindings = ['uid' => $userId, 'type' => $type];
         if ($relatedId !== null) {
             $sql .= ' AND related_id = :rid';

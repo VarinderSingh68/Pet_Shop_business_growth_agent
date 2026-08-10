@@ -91,7 +91,7 @@ final class LoyaltyService
             "SELECT lp.id, lp.user_id, lp.points, lp.expires_at, u.name, u.email FROM loyalty_points lp
              JOIN users u ON u.id = lp.user_id
              WHERE lp.type = 'earned' AND lp.expires_at IS NOT NULL
-               AND lp.expires_at BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)",
+               AND lp.expires_at BETWEEN date('now') AND date('now', '+30 days')",
         );
 
         $sent = 0;
@@ -123,7 +123,7 @@ final class LoyaltyService
     {
         $db = Database::instance();
         $expired = $db->select(
-            "SELECT id, user_id, points FROM loyalty_points WHERE type = 'earned' AND expires_at < CURDATE()
+            "SELECT id, user_id, points FROM loyalty_points WHERE type = 'earned' AND expires_at < date('now')
              AND id NOT IN (SELECT reference_id FROM loyalty_points WHERE type = 'expired' AND reference_type = 'loyalty_points')",
         );
 

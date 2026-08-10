@@ -7,14 +7,14 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE feature_flags (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                `key` VARCHAR(100) NOT NULL,
-                description VARCHAR(255) NULL,
-                is_enabled TINYINT(1) NOT NULL DEFAULT 0,
-                updated_at DATETIME NOT NULL,
-                UNIQUE KEY feature_flags_key_unique (`key`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            `key` VARCHAR(100) NOT NULL,
+            description VARCHAR(255) NULL,
+            is_enabled INTEGER NOT NULL DEFAULT 0,
+            updated_at DATETIME NOT NULL
+            )
         SQL);
+        $pdo->exec('CREATE UNIQUE INDEX feature_flags_key_unique ON feature_flags(`key`)');
     }
 
     public function down(PDO $pdo): void

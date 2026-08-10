@@ -15,12 +15,9 @@ return [
         'key' => env('APP_KEY', ''),
     ],
     'db' => [
-        'host' => env('DB_HOST', '127.0.0.1'),
-        'port' => (int) env('DB_PORT', 3306),
-        'database' => env('DB_DATABASE', 'petshop'),
-        'username' => env('DB_USERNAME', 'root'),
-        'password' => (string) env('DB_PASSWORD', ''),
-        'ssl_ca' => env('DB_SSL_CA', null),
+        // Elvis, not ??/env()'s own default: an empty-but-present DB_PATH= in
+        // .env is a real value as far as env() is concerned, not "unset".
+        'path' => env('DB_PATH') ?: storage_path('database.sqlite'),
     ],
     'mail' => [
         'mode' => env('MAIL_MODE', 'log'),

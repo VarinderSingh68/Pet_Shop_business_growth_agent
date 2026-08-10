@@ -7,19 +7,19 @@ return new class {
     {
         $pdo->exec(<<<SQL
             CREATE TABLE shipments (
-                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                order_id INT UNSIGNED NOT NULL,
-                carrier VARCHAR(100) NULL,
-                tracking_number VARCHAR(100) NULL,
-                status ENUM('pending','packed','shipped','delivered','returned') NOT NULL DEFAULT 'pending',
-                shipped_at DATETIME NULL,
-                delivered_at DATETIME NULL,
-                created_at DATETIME NOT NULL,
-                updated_at DATETIME NOT NULL,
-                KEY shipments_order_id_index (order_id),
-                CONSTRAINT shipments_order_fk FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INT NOT NULL,
+            carrier VARCHAR(100) NULL,
+            tracking_number VARCHAR(100) NULL,
+            status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','packed','shipped','delivered','returned')),
+            shipped_at DATETIME NULL,
+            delivered_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            CONSTRAINT shipments_order_fk FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+            )
         SQL);
+        $pdo->exec('CREATE INDEX shipments_order_id_index ON shipments(order_id)');
     }
 
     public function down(PDO $pdo): void

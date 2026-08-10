@@ -78,7 +78,7 @@ final class SegmentService
             "SELECT o.user_id FROM orders o
              WHERE o.user_id IS NOT NULL AND o.status != 'cancelled'
              GROUP BY o.user_id
-             HAVING COUNT(*) = 1 AND MIN(o.placed_at) >= DATE_SUB(NOW(), INTERVAL 30 DAY)",
+             HAVING COUNT(*) = 1 AND MIN(o.placed_at) >= datetime('now', '-30 days')",
         );
         return array_map(static fn (array $r) => (int) $r['user_id'], $rows);
     }
@@ -112,7 +112,7 @@ final class SegmentService
         $rows = $db->select(
             "SELECT DISTINCT user_id FROM pets
              WHERE species IN ('dog','cat') AND deleted_at IS NULL
-               AND birthday IS NOT NULL AND birthday >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)",
+               AND birthday IS NOT NULL AND birthday >= date('now', '-12 months')",
         );
         return array_map(static fn (array $r) => (int) $r['user_id'], $rows);
     }
@@ -122,7 +122,7 @@ final class SegmentService
         $rows = $db->select(
             "SELECT DISTINCT user_id FROM pets
              WHERE species IN ('dog','cat') AND deleted_at IS NULL
-               AND birthday IS NOT NULL AND birthday <= DATE_SUB(CURDATE(), INTERVAL 7 YEAR)",
+               AND birthday IS NOT NULL AND birthday <= date('now', '-7 years')",
         );
         return array_map(static fn (array $r) => (int) $r['user_id'], $rows);
     }
@@ -134,7 +134,7 @@ final class SegmentService
              FROM orders o
              WHERE o.user_id IS NOT NULL AND o.status != 'cancelled'
              GROUP BY o.user_id
-             HAVING COUNT(*) >= 2 AND SUM(o.coupon_id IS NOT NULL) / COUNT(*) >= 0.5",
+             HAVING COUNT(*) >= 2 AND CAST(SUM(o.coupon_id IS NOT NULL) AS REAL) / COUNT(*) >= 0.5",
         );
         return array_map(static fn (array $r) => (int) $r['user_id'], $rows);
     }

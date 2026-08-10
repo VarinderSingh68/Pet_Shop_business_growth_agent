@@ -18,8 +18,8 @@ final class Banner extends Model
              WHERE is_active = 1
                AND (target_page = 'all' OR target_page = :page)
                AND display_type = :type
-               AND (starts_at IS NULL OR starts_at <= NOW())
-               AND (ends_at IS NULL OR ends_at >= NOW())
+               AND (starts_at IS NULL OR starts_at <= datetime('now'))
+               AND (ends_at IS NULL OR ends_at >= datetime('now'))
              ORDER BY id DESC",
             ['page' => $page, 'type' => $displayType],
         );

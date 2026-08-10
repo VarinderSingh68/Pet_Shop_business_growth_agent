@@ -25,7 +25,7 @@ final class DeveloperController extends Controller
             'title' => 'Developer tools',
             'migrationCount' => (int) ($db->selectOne('SELECT COUNT(*) c FROM migrations')['c'] ?? 0),
             'lastCron' => CronRun::recent(1)[0] ?? null,
-            'slowQueryCount' => (int) ($db->selectOne('SELECT COUNT(*) c FROM slow_queries WHERE created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)')['c'] ?? 0),
+            'slowQueryCount' => (int) ($db->selectOne("SELECT COUNT(*) c FROM slow_queries WHERE created_at >= datetime('now', '-1 days')")['c'] ?? 0),
             'failedWebhookCount' => (int) ($db->selectOne("SELECT COUNT(*) c FROM webhook_deliveries WHERE outcome = 'failed'")['c'] ?? 0),
         ]);
     }
@@ -321,7 +321,7 @@ final class DeveloperController extends Controller
             abort(404);
         }
 
-        header('Content-Type: application/sql');
+        header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($path) . '"');
         readfile($path);
         exit;
