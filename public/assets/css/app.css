@@ -1,0 +1,331 @@
+:root {
+  --ink: #12141c;
+  --paper: #f6f7f2;
+  --leash: #e8492a;
+  --tennis: #f2b705;
+  --fern: #1f5f4a;
+  --mist: #dde3de;
+  --danger: #dc2626;
+  --info: #2563eb;
+  --plum: #7c3aed;
+  --sky: #2f7fb8;
+}
+
+* {
+  scrollbar-color: var(--ink) var(--mist);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+.font-display {
+  font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Visible focus ring everywhere, including admin */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--leash);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Kennel-card motif: thick border, squared tab corner, no soft shadow */
+.card-tag {
+  position: relative;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.card-tag__tab {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  border: 2px solid var(--ink);
+  border-top: none;
+  border-right: none;
+  background: var(--tennis);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Opt-in "sticker lift" hover — apply only to cards that are actually
+   interactive (product tiles, stat tiles, feature cards). Left off plain
+   .card-tag so static panels (forms, settings) don't jump under the cursor. */
+.card-tag--pop:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+/* Buttons — thick border + hard offset shadow, matches the card-tag motif */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-primary:hover {
+  background: var(--leash);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: var(--mist);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--paper);
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  padding: 0.625rem 0.875rem;
+}
+
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn-sm:hover {
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* Colorful pill status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.625rem;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  white-space: nowrap;
+}
+
+.badge-success { background: color-mix(in srgb, var(--fern) 15%, white); color: var(--fern); border-color: color-mix(in srgb, var(--fern) 35%, transparent); }
+.badge-warning { background: color-mix(in srgb, var(--tennis) 22%, white); color: #7a5a00; border-color: color-mix(in srgb, var(--tennis) 45%, transparent); }
+.badge-danger  { background: color-mix(in srgb, var(--danger) 12%, white); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
+.badge-info    { background: color-mix(in srgb, var(--info) 12%, white); color: var(--info); border-color: color-mix(in srgb, var(--info) 35%, transparent); }
+.badge-neutral { background: var(--mist); color: var(--ink); }
+
+/* Colored icon containers — used in stat tiles, nav, feature lists */
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  flex-shrink: 0;
+}
+
+.icon-chip-leash  { background: color-mix(in srgb, var(--leash) 15%, white); color: var(--leash); }
+.icon-chip-fern   { background: color-mix(in srgb, var(--fern) 15%, white); color: var(--fern); }
+.icon-chip-tennis { background: color-mix(in srgb, var(--tennis) 25%, white); color: #7a5a00; }
+.icon-chip-info   { background: color-mix(in srgb, var(--info) 12%, white); color: var(--info); }
+.icon-chip-plum   { background: color-mix(in srgb, var(--plum) 12%, white); color: var(--plum); }
+.icon-chip-sky    { background: color-mix(in srgb, var(--sky) 12%, white); color: var(--sky); }
+.icon-chip-ink    { background: var(--ink); color: var(--paper); }
+
+/* Big animated numbers for stat tiles */
+.stat-tile__value {
+  font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.875rem;
+  line-height: 1.1;
+  font-feature-settings: "tnum" 1;
+}
+
+.stat-tile__delta-up { color: var(--fern); }
+.stat-tile__delta-down { color: var(--danger); }
+
+/* Shared text input style */
+.input {
+  width: 100%;
+  border: 2px solid var(--ink);
+  padding: 0.625rem 1rem;
+  background: var(--paper);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus {
+  border-color: var(--leash);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--leash) 20%, transparent);
+}
+
+/* Leash Line signature element */
+.leash-line {
+  stroke: var(--leash);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: var(--leash-length, 2000);
+  stroke-dashoffset: var(--leash-length, 2000);
+  transition: stroke-dashoffset 0.15s linear;
+}
+
+.leash-line.is-static {
+  stroke-dashoffset: 0;
+  transition: none;
+}
+
+.paw-waypoint circle {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 2;
+  transition: fill 0.2s ease-out;
+}
+
+.paw-waypoint.is-active circle {
+  fill: var(--leash);
+}
+
+.paw-waypoint path {
+  fill: var(--ink);
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.paw-waypoint.is-active path {
+  opacity: 1;
+  fill: var(--paper);
+}
+
+/* Page-load stagger (once, gated by reduced motion) */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rise-in {
+  animation: rise-in 0.4s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in {
+    animation: none;
+  }
+}
+
+/* Small pop, used for badges/toasts appearing */
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.pop-in {
+  animation: pop-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Gentle bob, used for decorative accents */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Attention ring, used sparingly (cart badge, WhatsApp button) */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--leash) 45%, transparent); }
+  70% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--leash) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--leash) 0%, transparent); }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+
+/* Admin: dense table readability at 200+ rows */
+.admin-table th {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  z-index: 1;
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--mist) 35%, transparent);
+}
+
+.admin-table tbody tr:hover {
+  background: color-mix(in srgb, var(--tennis) 18%, transparent);
+}
