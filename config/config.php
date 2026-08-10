@@ -20,6 +20,7 @@ return [
         'database' => env('DB_DATABASE', 'petshop'),
         'username' => env('DB_USERNAME', 'root'),
         'password' => (string) env('DB_PASSWORD', ''),
+        'ssl_ca' => env('DB_SSL_CA', null),
     ],
     'mail' => [
         'mode' => env('MAIL_MODE', 'log'),

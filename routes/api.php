@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\Api\CronController;
 use App\Controllers\Api\OrdersController;
 use App\Controllers\Api\PaymentController;
 use App\Controllers\Api\ProductsController;
@@ -14,6 +15,8 @@ $router->group(['prefix' => '/api/v1'], function (Router $router) {
     $router->get('/health', function () {
         \App\Core\Response::json(['status' => 'ok', 'time' => now()]);
     });
+
+    $router->get('/cron/run', [CronController::class, 'run'], ['throttle:10,1']);
 
     $router->get('/search/autocomplete', [SearchController::class, 'autocomplete'], ['throttle:30,1']);
 

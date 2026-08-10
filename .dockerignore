@@ -1,0 +1,12 @@
+.git
+.gitattributes
+.gitignore
+.refact
+vendor/
+node_modules/
+.env
+storage/logs/*.log
+storage/cache/*
+storage/backups/*
+public/uploads/*
+*.md
