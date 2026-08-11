@@ -376,7 +376,6 @@ body.site-shell {
 body.site-shell > header,
 body.site-shell > main,
 body.site-shell > footer,
-body.site-shell > a,
 body.site-shell > div:not(.site-blob-layer) {
   position: relative;
   z-index: 1;
