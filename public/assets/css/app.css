@@ -372,8 +372,11 @@ body.site-shell {
   .site-blob { animation: none; }
 }
 
-/* Everything that should sit above the blob layer */
-body.site-shell > header,
+/* Everything that should sit above the blob layer. The header manages its
+   own stacking via its sticky/z-40 classes already — including it here
+   would override that down to z-index:1, letting <main> (same z-index,
+   later in DOM order) paint over it and bury the account dropdown menu
+   under page content. */
 body.site-shell > main,
 body.site-shell > footer,
 body.site-shell > div:not(.site-blob-layer) {
