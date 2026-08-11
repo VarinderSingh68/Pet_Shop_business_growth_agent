@@ -21,7 +21,7 @@ $referralUrl = url('/?ref=' . $referralCode);
       <div class="mt-6 grid sm:grid-cols-2 gap-5">
         <div class="card-tag p-6">
           <div class="card-tag__tab"><?= e($tier) ?></div>
-          <p class="text-xs uppercase tracking-wide text-ink/50 font-semibold">Loyalty points</p>
+          <p class="text-xs uppercase tracking-wide text-ink/50 font-semibold mt-6">Loyalty points</p>
           <p class="font-display text-4xl font-bold mt-1"><?= $balance ?></p>
           <p class="text-sm text-ink/60 mt-2">Worth <?= money($balance * 100) ?> off your next order. Redeem at checkout.</p>
           <p class="text-xs text-ink/40 mt-2">Earn 1 point per ₹10 spent. Points expire 12 months after they're earned.</p>
@@ -29,7 +29,7 @@ $referralUrl = url('/?ref=' . $referralCode);
 
         <div class="card-tag p-6">
           <div class="card-tag__tab">Refer a friend</div>
-          <p class="text-xs uppercase tracking-wide text-ink/50 font-semibold">Your referral link</p>
+          <p class="text-xs uppercase tracking-wide text-ink/50 font-semibold mt-6">Your referral link</p>
           <p class="font-mono text-sm mt-2 break-all bg-mist/40 p-2"><?= e($referralUrl) ?></p>
           <p class="text-sm text-ink/60 mt-3">You and your friend each get ₹150 in loyalty points when they place their first order.</p>
         </div>

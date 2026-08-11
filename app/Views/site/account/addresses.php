@@ -65,7 +65,7 @@
           <?php foreach ($addresses as $addr): ?>
             <div class="card-tag p-5">
               <?php if ($addr['is_default']): ?><div class="card-tag__tab">Default</div><?php endif; ?>
-              <p class="font-semibold"><?= e($addr['label']) ?></p>
+              <p class="font-semibold <?= $addr['is_default'] ? 'mt-6' : '' ?>"><?= e($addr['label']) ?></p>
               <p class="text-sm text-ink/70 mt-1"><?= e($addr['full_name']) ?><br>
                 <?= e($addr['line1']) ?><?= $addr['line2'] ? ', ' . e($addr['line2']) : '' ?><br>
                 <?= e($addr['city']) ?>, <?= e($addr['state']) ?> <?= e($addr['postal_code']) ?><br>

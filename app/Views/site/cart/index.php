@@ -57,13 +57,13 @@
       <div class="card-tag p-6 h-fit sticky top-24">
         <div class="card-tag__tab">Summary</div>
         <?php if ($totals['coupon']): ?>
-          <form method="POST" action="/cart/coupon/remove" class="flex items-center justify-between mb-4 text-sm bg-fern/10 border-2 border-fern px-3 py-2">
+          <form method="POST" action="/cart/coupon/remove" class="flex items-center justify-between mb-4 mt-6 text-sm bg-fern/10 border-2 border-fern px-3 py-2">
             <?= csrf_field() ?>
             <span class="flex items-center gap-1.5"><?= icon('tag', 'h-4 w-4 text-fern') ?> Coupon <strong><?= e($totals['coupon']['code']) ?></strong> applied</span>
             <button type="submit" class="text-leash font-semibold hover:underline">Remove</button>
           </form>
         <?php else: ?>
-          <form method="POST" action="/cart/coupon" class="flex gap-2 mb-4">
+          <form method="POST" action="/cart/coupon" class="flex gap-2 mb-4 mt-6">
             <?= csrf_field() ?>
             <label class="sr-only" for="coupon-code">Coupon code</label>
             <input id="coupon-code" type="text" name="code" placeholder="Coupon code" class="input flex-1 text-sm uppercase">

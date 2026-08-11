@@ -14,7 +14,7 @@
 
   <div class="mt-8 card-tag p-6 text-left">
     <div class="card-tag__tab">Appointment</div>
-    <p class="font-display text-lg font-semibold"><?= e($appointment['service_name']) ?></p>
+    <p class="font-display text-lg font-semibold mt-6"><?= e($appointment['service_name']) ?></p>
     <p class="text-sm text-ink/70 mt-1">with <?= e($appointment['staff_name']) ?></p>
     <p class="text-sm text-ink/70 mt-1"><?= date('l, d M Y \a\t g:i A', strtotime($appointment['start_at'])) ?></p>
     <?php if ($appointment['deposit_paise']): ?>

@@ -9,7 +9,7 @@
   <div class="card-tag p-8 sm:p-10">
     <div class="card-tag__tab">Welcome back</div>
 
-    <h1 class="font-display text-3xl font-bold">Sign in</h1>
+    <h1 class="font-display text-3xl font-bold mt-6">Sign in</h1>
     <p class="mt-2 text-ink/60">New here? <a href="/account/register" class="text-leash font-semibold hover:underline">Create an account</a>.</p>
 
     <?php if ($googleEnabled): ?>

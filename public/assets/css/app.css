@@ -314,6 +314,251 @@ textarea:focus-visible,
   animation: pulse-ring 2.4s ease-out infinite;
 }
 
+/* =========================================================================
+   Storefront "soft" theme — scoped to body.site-shell so the admin panel
+   (which shares this stylesheet) keeps its original kennel-tag look.
+   Pastel gradients, glassmorphism, pill shapes, floating blobs, and
+   scroll-triggered motion, replacing the hard-border/offset-shadow style
+   on the same .btn/.card-tag/.input/.icon-chip class names.
+   ========================================================================= */
+
+body.site-shell {
+  --lav: #a78bfa;
+  --blush: #f9a8d4;
+  --peach: #fdba74;
+  --skyb: #7dd3fc;
+  --mint: #86efac;
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  background:
+    radial-gradient(ellipse 900px 600px at 8% -5%, color-mix(in srgb, var(--lav) 22%, transparent), transparent),
+    radial-gradient(ellipse 900px 700px at 100% 10%, color-mix(in srgb, var(--blush) 20%, transparent), transparent),
+    radial-gradient(ellipse 800px 600px at 0% 70%, color-mix(in srgb, var(--skyb) 18%, transparent), transparent),
+    radial-gradient(ellipse 900px 700px at 100% 100%, color-mix(in srgb, var(--mint) 16%, transparent), transparent),
+    #f7f5fb;
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Ambient floating blobs — fixed, decorative, behind everything on every page */
+.site-blob-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.site-blob {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(60px);
+  opacity: 0.5;
+  animation: blob-float 16s ease-in-out infinite;
+}
+
+.site-blob--1 { top: -6rem; left: -4rem; width: 22rem; height: 22rem; background: radial-gradient(circle, var(--lav), transparent 70%); }
+.site-blob--2 { top: 15rem; right: -6rem; width: 26rem; height: 26rem; background: radial-gradient(circle, var(--blush), transparent 70%); animation-delay: -4s; animation-duration: 20s; }
+.site-blob--3 { bottom: -8rem; left: 10%; width: 24rem; height: 24rem; background: radial-gradient(circle, var(--skyb), transparent 70%); animation-delay: -9s; animation-duration: 18s; }
+.site-blob--4 { bottom: 20rem; right: 8%; width: 18rem; height: 18rem; background: radial-gradient(circle, var(--mint), transparent 70%); animation-delay: -2s; animation-duration: 22s; }
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(3%, 4%) scale(1.08); }
+  66% { transform: translate(-4%, -2%) scale(0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-blob { animation: none; }
+}
+
+/* Everything that should sit above the blob layer */
+body.site-shell > header,
+body.site-shell > main,
+body.site-shell > footer,
+body.site-shell > a,
+body.site-shell > div:not(.site-blob-layer) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glass panel utility — floating nav, hero callouts, bespoke sections */
+.site-shell .glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(76, 29, 149, 0.08);
+}
+
+/* Cards — soft glass tiles instead of hard-bordered kennel tags */
+.site-shell .card-tag {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 10px 30px -12px rgba(76, 29, 149, 0.18);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s;
+  overflow: hidden;
+}
+
+.site-shell .card-tag--pop:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 22px 40px -14px rgba(76, 29, 149, 0.28);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+.site-shell .card-tag__tab {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--lav), var(--blush));
+  color: #fff;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 12px -4px rgba(124, 58, 237, 0.5);
+}
+
+/* Buttons — pill shape, gradient fill, soft glow instead of offset shadow */
+.site-shell .btn {
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 10px 24px -8px rgba(124, 58, 237, 0.35);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s;
+}
+
+.site-shell .btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 32px -8px rgba(124, 58, 237, 0.45);
+}
+
+.site-shell .btn:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.site-shell .btn-primary {
+  background: linear-gradient(135deg, var(--lav), var(--blush));
+  color: #fff;
+}
+
+.site-shell .btn-primary:hover {
+  background: linear-gradient(135deg, #9260f5, var(--blush));
+  filter: brightness(1.04);
+}
+
+.site-shell .btn-secondary {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 8px 20px -10px rgba(18, 20, 28, 0.25);
+}
+
+.site-shell .btn-secondary:hover {
+  background: #fdfaff;
+}
+
+.site-shell .btn-ghost {
+  background: transparent;
+  box-shadow: none;
+}
+
+.site-shell .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.site-shell .btn-sm {
+  box-shadow: 0 6px 16px -8px rgba(124, 58, 237, 0.35);
+}
+
+/* Inputs — soft rounded glass fields */
+.site-shell .input {
+  border: 1.5px solid rgba(18, 20, 28, 0.12);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+}
+
+.site-shell .input:focus {
+  border-color: var(--lav);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lav) 18%, transparent);
+}
+
+/* Icon chips — gradient rounded-2xl instead of flat tint */
+.site-shell .icon-chip {
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px -6px rgba(76, 29, 149, 0.35);
+}
+
+.site-shell .icon-chip-leash  { background: linear-gradient(135deg, var(--blush), var(--peach)); color: #fff; }
+.site-shell .icon-chip-fern   { background: linear-gradient(135deg, var(--mint), var(--skyb)); color: #0b3d2e; }
+.site-shell .icon-chip-tennis { background: linear-gradient(135deg, var(--peach), #fde68a); color: #7a4a00; }
+.site-shell .icon-chip-info   { background: linear-gradient(135deg, var(--skyb), var(--lav)); color: #fff; }
+.site-shell .icon-chip-plum   { background: linear-gradient(135deg, var(--lav), #c084fc); color: #fff; }
+.site-shell .icon-chip-sky    { background: linear-gradient(135deg, var(--skyb), #38bdf8); color: #fff; }
+.site-shell .icon-chip-ink    { background: linear-gradient(135deg, #4c1d95, #1e1b4b); color: #fff; }
+
+/* Gradient headline text, used sparingly for emphasis */
+.site-shell .text-gradient {
+  background: linear-gradient(135deg, var(--lav), var(--blush) 60%, var(--peach));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Floating pill nav */
+.site-shell .site-nav {
+  border-radius: 999px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 40px -16px rgba(76, 29, 149, 0.25);
+}
+
+/* Scroll-reveal — elements start hidden/offset, JS toggles .is-visible
+   on intersection. Respect prefers-reduced-motion (elements just show). */
+.site-shell [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.site-shell [data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Gentle continuous drift for hero art / decorative photo cards */
+@keyframes soft-drift {
+  0%, 100% { transform: translateY(0) rotate(var(--drift-rot, 0deg)); }
+  50% { transform: translateY(-14px) rotate(var(--drift-rot, 0deg)); }
+}
+
+.site-shell .soft-drift {
+  animation: soft-drift 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell .soft-drift {
+    animation: none;
+  }
+}
+
 /* Admin: dense table readability at 200+ rows */
 .admin-table th {
   position: sticky;

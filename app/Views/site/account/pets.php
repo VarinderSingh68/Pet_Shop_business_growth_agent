@@ -70,7 +70,7 @@
           <?php foreach ($pets as $pet): ?>
             <div class="card-tag p-5">
               <div class="card-tag__tab"><?= e(ucfirst($pet['species'])) ?></div>
-              <p class="font-display text-lg font-semibold"><?= e($pet['name']) ?></p>
+              <p class="font-display text-lg font-semibold mt-6"><?= e($pet['name']) ?></p>
               <p class="text-sm text-ink/60 mt-1">
                 <?= e($pet['breed'] ?? 'Breed not set') ?>
                 <?php $age = \App\Models\Pet::ageLabel($pet['birthday']); ?>

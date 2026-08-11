@@ -15,7 +15,7 @@ $totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4" data-reveal>
     <div>
       <h1 class="font-display text-3xl font-bold"><?= !empty($filters['q']) ? 'Search results for "' . e($filters['q']) . '"' : 'Shop' ?></h1>
       <p class="mt-1 text-ink/60"><?= $total ?> product<?= $total === 1 ? '' : 's' ?></p>
@@ -41,9 +41,9 @@ $totalPages = max(1, (int) ceil($total / $perPage));
     </form>
   </div>
 
-  <div class="mt-8 grid lg:grid-cols-[240px_1fr] gap-10">
+  <div class="mt-8 grid lg:grid-cols-[260px_1fr] gap-10">
     <!-- Facets -->
-    <aside class="space-y-8">
+    <aside class="card-tag p-6 h-fit space-y-8" data-reveal>
       <form method="GET" action="/shop" class="space-y-8">
         <?php if (!empty($filters['q'])): ?><input type="hidden" name="q" value="<?= e($filters['q']) ?>"><?php endif; ?>
 
@@ -84,7 +84,7 @@ $totalPages = max(1, (int) ceil($total / $perPage));
               <li class="flex items-center gap-2">
                 <input type="checkbox" id="brand-<?= (int) $brand['id'] ?>" name="brand[]" value="<?= e($brand['slug']) ?>"
                        <?= in_array($brand['slug'], (array) ($filters['brand'] ?? []), true) ? 'checked' : '' ?>
-                       class="border-2 border-ink">
+                       class="rounded accent-[#7c3aed] w-4 h-4">
                 <label for="brand-<?= (int) $brand['id'] ?>" class="flex-1 flex justify-between">
                   <span><?= e($brand['name']) ?></span>
                   <span class="text-ink/40"><?= (int) $brand['product_count'] ?></span>
@@ -118,7 +118,7 @@ $totalPages = max(1, (int) ceil($total / $perPage));
     <!-- Results -->
     <div>
       <?php if ($items === []): ?>
-        <div class="card-tag p-10 text-center">
+        <div class="card-tag p-10 text-center" data-reveal>
           <span class="icon-chip icon-chip-leash mx-auto"><?= icon('search', 'h-5 w-5') ?></span>
           <p class="font-display text-xl font-semibold mt-4">No products match those filters.</p>
           <p class="mt-2 text-ink/60">Try clearing a filter or searching a different term.</p>
@@ -127,7 +127,7 @@ $totalPages = max(1, (int) ceil($total / $perPage));
       <?php else: ?>
         <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
           <?php foreach ($items as $i => $product): ?>
-            <a href="/shop/<?= e($product['slug']) ?>" class="card-tag card-tag--pop rise-in group flex flex-col" style="animation-delay:<?= ($i % 6) * 60 ?>ms">
+            <a href="/shop/<?= e($product['slug']) ?>" class="card-tag card-tag--pop group flex flex-col" data-reveal style="transition-delay:<?= ($i % 6) * 60 ?>ms">
               <?php if ((int) $product['total_stock'] <= 0): ?>
                 <div class="card-tag__tab !bg-ink !text-paper">Out of stock</div>
               <?php elseif ($product['compare_at_price_paise']): ?>
@@ -158,8 +158,8 @@ $totalPages = max(1, (int) ceil($total / $perPage));
           <nav class="mt-10 flex justify-center gap-2" aria-label="Pagination">
             <?php for ($p = 1; $p <= $totalPages; $p++): ?>
               <a href="<?= e(query_with($filters, ['page' => $p])) ?>"
-                 class="w-9 h-9 flex items-center justify-center border-2 font-medium transition-colors duration-150 <?= $p === $page ? 'border-leash bg-leash text-paper shadow-[3px_3px_0_var(--ink)]' : 'border-ink hover:border-leash hover:text-leash' ?>"
-                 <?= $p === $page ? 'aria-current="page"' : '' ?>><?= $p ?></a>
+                 class="w-10 h-10 flex items-center justify-center rounded-full font-medium transition-all duration-200 <?= $p === $page ? 'text-white shadow-lg' : 'glass hover:-translate-y-0.5' ?>"
+                 <?= $p === $page ? 'style="background: linear-gradient(135deg, var(--lav), var(--blush));" aria-current="page"' : '' ?>><?= $p ?></a>
             <?php endfor; ?>
           </nav>
         <?php endif; ?>

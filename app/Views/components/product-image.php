@@ -6,12 +6,12 @@
 $class ??= 'aspect-square';
 
 $palette = [
-    'dog' => ['bg' => 'bg-leash', 'text' => 'text-paper'],
-    'cat' => ['bg' => 'bg-fern', 'text' => 'text-paper'],
-    'bird' => ['bg' => 'bg-tennis', 'text' => 'text-ink'],
-    'fish' => ['bg' => 'bg-ink', 'text' => 'text-paper'],
-    'small_pet' => ['bg' => 'bg-mist', 'text' => 'text-ink'],
-    'other' => ['bg' => 'bg-mist', 'text' => 'text-ink'],
+    'dog' => ['grad' => 'linear-gradient(135deg, #fbcfe8, #fde68a)', 'text' => 'text-ink/70'],
+    'cat' => ['grad' => 'linear-gradient(135deg, #ddd6fe, #fbcfe8)', 'text' => 'text-ink/70'],
+    'bird' => ['grad' => 'linear-gradient(135deg, #bae6fd, #ddd6fe)', 'text' => 'text-ink/70'],
+    'fish' => ['grad' => 'linear-gradient(135deg, #a7f3d0, #bae6fd)', 'text' => 'text-ink/70'],
+    'small_pet' => ['grad' => 'linear-gradient(135deg, #fde68a, #a7f3d0)', 'text' => 'text-ink/70'],
+    'other' => ['grad' => 'linear-gradient(135deg, #e2e8f0, #ddd6fe)', 'text' => 'text-ink/70'],
 ];
 $tone = $palette[$product['pet_type']] ?? $palette['other'];
 
@@ -25,7 +25,7 @@ $icons = [
 ];
 $icon = $icons[$product['pet_type']] ?? $icons['other'];
 ?>
-<div class="<?= e($class) ?> <?= e($tone['bg']) ?> <?= e($tone['text']) ?> flex items-center justify-center relative overflow-hidden">
-  <svg viewBox="0 0 24 24" fill="currentColor" class="w-1/3 h-1/3 opacity-90" aria-hidden="true"><path d="<?= $icon ?>"/></svg>
-  <span class="absolute bottom-2 right-2 text-[10px] font-semibold uppercase tracking-wide opacity-60"><?= e($product['pet_type']) ?></span>
+<div class="<?= e($class) ?> <?= e($tone['text']) ?> flex items-center justify-center relative overflow-hidden" style="background: <?= $tone['grad'] ?>;">
+  <svg viewBox="0 0 24 24" fill="currentColor" class="w-1/3 h-1/3 opacity-60" aria-hidden="true"><path d="<?= $icon ?>"/></svg>
+  <span class="absolute bottom-2 right-2 text-[10px] font-semibold uppercase tracking-wide opacity-50"><?= e($product['pet_type']) ?></span>
 </div>

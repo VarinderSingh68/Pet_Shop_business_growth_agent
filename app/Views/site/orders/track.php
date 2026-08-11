@@ -38,7 +38,7 @@ $currentIndex = array_search($order['status'], array_keys($steps), true);
 
   <div class="mt-12 card-tag p-6">
     <div class="card-tag__tab">Items</div>
-    <ul class="space-y-3 text-sm">
+    <ul class="space-y-3 text-sm mt-6">
       <?php foreach ($items as $item): ?>
         <li class="flex justify-between">
           <span><?= e($item['product_name_snapshot']) ?> <span class="text-ink/50">(<?= e($item['variant_label_snapshot']) ?>) &times;<?= (int) $item['quantity'] ?></span></span>

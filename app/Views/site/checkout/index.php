@@ -109,7 +109,7 @@ $defaultAddress = $addresses[0] ?? null;
 
     <div class="card-tag p-6 h-fit">
       <div class="card-tag__tab">Order</div>
-      <ul class="space-y-3 text-sm mb-4">
+      <ul class="space-y-3 text-sm mb-4 mt-6">
         <?php foreach ($items as $item): ?>
           <li class="flex justify-between">
             <span><?= e($item['product_name']) ?> <span class="text-ink/50">&times;<?= (int) $item['quantity'] ?></span></span>
