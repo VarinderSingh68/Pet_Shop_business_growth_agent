@@ -1,0 +1,109 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Strict comparison using \=\=\= between array and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Core/Migrator.php
+
+		-
+			message: '#^Class App\\Middleware\\AdminMiddleware does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Class App\\Middleware\\ApiTokenMiddleware does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Class App\\Middleware\\AuthMiddleware does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Class App\\Middleware\\CsrfMiddleware does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Class App\\Middleware\\DeveloperMiddleware does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Class App\\Middleware\\GuestMiddleware does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Class App\\Middleware\\MaintenanceMiddleware does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Offset ''uri'' does not exist on array\{pattern\: string, handler\: mixed, middleware\: array\<int, string\>, params\: array\<int, string\>\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 2
+			path: app/Core/Router.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between non\-falsy\-string and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Core/Router.php
+
+		-
+			message: '#^Offset ''content'' on array\{\} on left side of \?\?\= does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Core/View.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: app/Core/View.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between mixed and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Core/helpers.php
+
+		-
+			message: '#^Offset ''error'' on array\{tmp_name\: string, size\: int, error\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Services/MediaService.php
+
+		-
+			message: '#^Access to an undefined property Razorpay\\Api\\Api\:\:\$order\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PaymentService.php
+
+		-
+			message: '#^Variable \$argv might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: database/migrate.php
+
+		-
+			message: '#^Variable \$roleIds might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: database/seeds/002_base_accounts.php
+
+		-
+			message: '#^Offset ''compare'' on array\{label\: ''1\.5kg'', price\: 64900, weight\: 1500, stock\: 25\}\|array\{label\: ''1\.5kg'', price\: 69900, weight\: 1500, stock\: 24\}\|array\{label\: ''1\.5kg'', price\: 79900, weight\: 1500, stock\: 16\}\|array\{label\: ''100g'', price\: 49900, stock\: 24\}\|array\{label\: ''10kg'', price\: 349900, weight\: 10000, stock\: 10\}\|array\{label\: ''12 x 85g'', price\: 89900, stock\: 28\}\|array\{label\: ''12 x 85g'', price\: 94900, stock\: 20\}\|array\{label\: ''150g'', price\: 19900, weight\: 150, stock\: 35\}\|array\{label\: ''15kg'', price\: 329900, weight\: 15000, stock\: 8\}\|array\{label\: ''2 pack'', price\: 14900, stock\: 40\}\|array\{label\: ''200ml'', price\: 39900, stock\: 28\}\|array\{label\: ''250ml''\|''Standard'', price\: 34900, stock\: 30\}\|array\{label\: ''250ml''\|''Standard'', price\: 69900, stock\: 22\}\|array\{label\: ''2kg'', price\: 159900, weight\: 2000, stock\: 14\}\|array\{label\: ''2kg'', price\: 39900, weight\: 2000, stock\: 20\}\|array\{label\: ''3\-pack'', price\: 159900, stock\: 15\}\|array\{label\: ''30 chews'', price\: 84900, stock\: 20\}\|array\{label\: ''3kg'', price\: 129900, weight\: 3000, stock\: 22\}\|array\{label\: ''3kg'', price\: 139900, weight\: 3000, stock\: 18\}\|array\{label\: ''3kg'', price\: 74900, weight\: 3000, stock\: 30\}\|array\{label\: ''50g'', price\: 19900, weight\: 50, stock\: 40\}\|array\{label\: ''5L'', price\: 89900, stock\: 22\}\|array\{label\: ''60g'', price\: 79900, stock\: 18\}\|array\{label\: ''7 pack'', price\: 29900, stock\: 35\}\|array\{label\: ''80g'', price\: 34900, stock\: 40\}\|array\{label\: ''Large'', price\: 99900, stock\: 12\|16\}\|array\{label\: ''Medium'', price\: 89900, stock\: 15\|24\}\|array\{label\: ''Set of 2''\|''Single dose'', price\: 59900, stock\: 30\}\|array\{label\: ''Set of 3'', price\: 34900, stock\: 18\}\|array\{label\: ''Small'', price\: 79900, stock\: 20\}\|array\{label\: ''Standard'', price\: 129900, stock\: 12\}\|array\{label\: ''Standard'', price\: 189900, stock\: 8\}\|array\{label\: ''Standard'', price\: 19900, stock\: 50\}\|array\{label\: ''Standard'', price\: 24900\|44900, stock\: 25\|45\}\|array\{label\: ''Standard'', price\: 349900, stock\: 6\}\|array\{label\: ''Standard'', price\: 59900, stock\: 20\}\|array\{label\: ''Standard'', price\: 99900, stock\: 14\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: database/seeds/007_catalogue_expansion.php

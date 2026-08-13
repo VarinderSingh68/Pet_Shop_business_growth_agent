@@ -117,7 +117,7 @@ final class DashboardController extends Controller
         )['r'] ?? 0);
     }
 
-    /** @return array{visitors_proxy: int, carts: int, orders: int} */
+    /** @return array{carts: int, orders: int} */
     private function conversionFunnel(Database $db): array
     {
         $carts = (int) ($db->selectOne(

@@ -117,8 +117,26 @@ every boot.
   ~30-60s to wake up on the next visit. Your external cron pings every 15
   minutes will incidentally keep it warm most of the time.
 - **No persistent disk**: see above — this also affects product images
-  uploaded through the admin panel after deployment (the demo product images
-  already committed to the repo are baked into the image and are unaffected).
+  uploaded through the admin panel after deployment; they live only in the
+  running container and are gone on the next redeploy or restart. The seeded
+  demo catalogue doesn't ship with product photos at all (`storage/uploads/`
+  is intentionally not committed — see `.gitignore`), so products show their
+  placeholder state until images are uploaded through the admin panel.
+
+## Pre-deploy checklist
+
+- [ ] `DEVELOPER_TOOLS` is `false` for any environment reachable by the public
+  (already set this way in `render.yaml`; double-check if you deploy some
+  other way).
+- [ ] The owner login shown in the boot logs (step 5) has been noted and,
+  for a deployment meant to stay up and hold real data, changed to something
+  only you know — the seeder generates a random password per boot, but
+  anyone with log access at that moment can read it.
+- [ ] `APP_DEBUG` is `false` in production — a stack trace on a live 500 page
+  is a gift to an attacker, not a debugging aid.
+- [ ] If this deployment is meant to persist real data (not the free-tier
+  reset-on-every-boot demo mode above), `DB_AUTO_SEED` is set to `false` and
+  `storage/` is on a persistent disk.
 
 ## Updating Google OAuth / Razorpay later
 

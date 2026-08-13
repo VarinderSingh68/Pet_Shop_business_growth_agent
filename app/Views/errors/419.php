@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Session expired — Happy Tails Pet Store</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{colors:{ink:'#12141c',paper:'#f6f7f2',leash:'#e8492a',tennis:'#f2b705'}}}};</script>
+<link rel="stylesheet" href="/assets/build/tailwind.css">
 </head>
 <body class="bg-paper text-ink font-sans antialiased min-h-screen flex items-center justify-center px-4">
   <div class="text-center max-w-md">

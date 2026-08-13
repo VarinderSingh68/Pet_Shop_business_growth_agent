@@ -6,7 +6,17 @@
 !/storage/cache/.gitkeep
 /storage/backups/*
 !/storage/backups/.gitkeep
+/storage/database.sqlite
+/storage/uploads/*
+!/storage/uploads/.gitkeep
 /public/uploads/*
 !/public/uploads/.gitkeep
+/public/assets/build/
 .DS_Store
 Thumbs.db
+
+# PHPStan / PHP-CS-Fixer caches
+/.php-cs-fixer.cache
+/phpstan.cache/
+/.phpunit.cache/
+/.phpunit.result.cache

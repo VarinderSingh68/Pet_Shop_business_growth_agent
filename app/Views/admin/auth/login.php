@@ -6,16 +6,7 @@
 <title>Admin sign in — <?= e(config('app.name')) ?></title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = { theme: { extend: {
-    colors: { ink: '#12141c', paper: '#f6f7f2', leash: '#e8492a', tennis: '#f2b705', fern: '#1f5f4a', mist: '#dde3de' },
-    fontFamily: {
-      display: ['"Bricolage Grotesque"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-      sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-    },
-  } } };
-</script>
+<link rel="stylesheet" href="/assets/build/tailwind.css">
 <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 <body class="bg-ink text-paper font-sans antialiased min-h-screen flex items-center justify-center px-4">

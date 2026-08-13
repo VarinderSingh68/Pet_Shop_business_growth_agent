@@ -8,31 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          ink: '#12141c',
-          paper: '#f6f7f2',
-          leash: '<?= e(theme_accent_hex()) ?>',
-          tennis: '#f2b705',
-          fern: '#1f5f4a',
-          mist: '#dde3de',
-          danger: '#dc2626',
-          info: '#2563eb',
-          plum: '#7c3aed',
-          sky: '#2f7fb8',
-        },
-        fontFamily: {
-          display: ['"Bricolage Grotesque"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        },
-      },
-    },
-  };
-</script>
+<link rel="stylesheet" href="/assets/build/tailwind.css">
 <link rel="stylesheet" href="/assets/css/app.css">
 <style>:root { --leash: <?= e(theme_accent_hex()) ?>; --danger: #dc2626; --info: #2563eb; --plum: #7c3aed; --sky: #2f7fb8; } [x-cloak] { display: none !important; }</style>
 <script defer src="/assets/js/alpine.min.js"></script>

@@ -1,0 +1,11 @@
+{
+  "name": "happytails-pet-shop-assets",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i ./resources/css/tailwind.css -o ./public/assets/build/tailwind.css --minify",
+    "dev": "tailwindcss -i ./resources/css/tailwind.css -o ./public/assets/build/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -1,3 +1,14 @@
+# Builds the Tailwind CSS bundle in an isolated stage so the final image
+# doesn't need Node at all — only the compiled CSS is copied over.
+FROM node:20-slim AS assets
+WORKDIR /build
+COPY package.json package-lock.json* ./
+RUN npm install --no-fund --no-audit
+COPY tailwind.config.js ./
+COPY resources/css ./resources/css
+COPY app/Views ./app/Views
+RUN npm run build
+
 FROM php:8.3-apache
 
 # System libraries needed by the PHP extensions below, plus curl/git/unzip
@@ -28,6 +39,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader
 
 COPY . .
+COPY --from=assets /build/public/assets/build ./public/assets/build
 
 RUN composer dump-autoload --optimize --no-dev
 

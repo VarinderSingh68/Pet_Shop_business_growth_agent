@@ -8,5 +8,8 @@ node_modules/
 storage/logs/*.log
 storage/cache/*
 storage/backups/*
+storage/database.sqlite
+storage/uploads/*
 public/uploads/*
+public/assets/build/*
 *.md
