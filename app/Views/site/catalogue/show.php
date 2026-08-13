@@ -27,12 +27,41 @@ $variantsJson = json_encode(array_map(static function (array $v) use ($product) 
 $defaultVariant = $variants[0] ?? null;
 ?>
 
-<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10"
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-10"
          x-data='{
             variants: <?= $variantsJson ?>,
             selected: <?= $defaultVariant ? (int) $defaultVariant['id'] : 'null' ?>,
             get variant() { return this.variants.find(v => v.id === this.selected) },
             zoom: false,
+            adding: false,
+            async addToCart() {
+              if (this.adding || !this.variant || this.variant.stock <= 0) return;
+              this.adding = true;
+              try {
+                const res = await fetch('/cart/add', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content,
+                  },
+                  body: new URLSearchParams({
+                    product_id: '<?= (int) $product['id'] ?>',
+                    variant_id: String(this.selected),
+                    qty: String(this.$refs.qty.value || 1),
+                  }),
+                });
+                const data = await res.json();
+                window.dispatchEvent(new CustomEvent('petshop-toast', { detail: { type: res.ok ? 'success' : 'error', message: data.message } }));
+                if (res.ok) {
+                  window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cartCount } }));
+                }
+              } catch {
+                window.dispatchEvent(new CustomEvent('petshop-toast', { detail: { type: 'error', message: 'Something went wrong. Please try again.' } }));
+              } finally {
+                this.adding = false;
+              }
+            },
          }'>
 
   <nav class="text-sm text-ink/50" aria-label="Breadcrumb">
@@ -112,14 +141,14 @@ $defaultVariant = $variants[0] ?? null;
         </div>
       </fieldset>
 
-      <form method="POST" action="/cart/add" class="mt-8 flex gap-3">
+      <form method="POST" action="/cart/add" class="mt-8 flex gap-3" @submit.prevent="addToCart()">
         <?= csrf_field() ?>
         <input type="hidden" name="product_id" value="<?= (int) $product['id'] ?>">
         <input type="hidden" name="variant_id" x-bind:value="selected">
-        <input type="number" name="qty" value="1" min="1" class="input w-20 !rounded-full text-center">
-        <button type="submit" :disabled="!variant || variant.stock <= 0"
+        <input type="number" name="qty" x-ref="qty" value="1" min="1" class="input w-20 !rounded-full text-center">
+        <button type="submit" :disabled="!variant || variant.stock <= 0 || adding"
                 class="btn btn-primary flex-1 disabled:opacity-40 disabled:cursor-not-allowed">
-          <?= icon('cart', 'h-4 w-4') ?> Add to cart
+          <?= icon('cart', 'h-4 w-4') ?> <span x-text="adding ? 'Adding…' : 'Add to cart'"></span>
         </button>
       </form>
 
@@ -251,6 +280,18 @@ $defaultVariant = $variants[0] ?? null;
       </div>
     </div>
   <?php endif; ?>
+
+  <!-- Sticky mobile add-to-cart bar -->
+  <div class="glass lg:hidden fixed inset-x-3 bottom-3 z-40 rounded-3xl px-4 py-3 flex items-center gap-3">
+    <div class="min-w-0">
+      <p class="text-xs text-ink/50 truncate"><?= e($product['name']) ?></p>
+      <p class="font-display text-lg font-bold" x-text="variant ? variant.price : ''"></p>
+    </div>
+    <button type="button" @click="addToCart()" :disabled="!variant || variant.stock <= 0 || adding"
+            class="btn btn-primary flex-1 disabled:opacity-40 disabled:cursor-not-allowed">
+      <?= icon('cart', 'h-4 w-4') ?> <span x-text="adding ? 'Adding…' : (!variant || variant.stock <= 0 ? 'Out of stock' : 'Add to cart')"></span>
+    </button>
+  </div>
 </section>
 
 <?php \App\Core\View::stop(); ?>

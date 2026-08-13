@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= isset($title) ? e($title) . ' — ' : '' ?><?= e(config('app.name')) ?></title>
 <meta name="description" content="<?= e($description ?? 'Food, gear, grooming and vet care for the pet you\'re raising — plus reminders that keep up with them.') ?>">
+<meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -100,11 +101,14 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <a href="/cart" class="relative flex items-center justify-center text-ink hover:text-[#7c3aed] transition-colors duration-150" aria-label="Cart<?= $cartItemCount > 0 ? ' — ' . $cartItemCount . ' item' . ($cartItemCount === 1 ? '' : 's') : '' ?>">
+        <a href="/cart" class="relative flex items-center justify-center text-ink hover:text-[#7c3aed] transition-colors duration-150"
+           x-data="{ count: <?= (int) $cartItemCount ?>, bump: false }"
+           x-init="window.addEventListener('cart-updated', (e) => { count = e.detail.count; bump = true; setTimeout(() => bump = false, 300); })"
+           :aria-label="'Cart' + (count > 0 ? ' — ' + count + ' item' + (count === 1 ? '' : 's') : '')"
+           :class="bump ? 'scale-110' : 'scale-100'" style="transition: transform 150ms ease-out;">
           <?= icon('cart', 'h-6 w-6') ?>
-          <?php if ($cartItemCount > 0): ?>
-            <span class="pulse-ring absolute -top-1.5 -right-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-leash px-1 text-[10px] font-bold text-paper"><?= $cartItemCount > 99 ? '99+' : $cartItemCount ?></span>
-          <?php endif; ?>
+          <span x-show="count > 0" x-cloak x-text="count > 99 ? '99+' : count"
+                class="pulse-ring absolute -top-1.5 -right-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-leash px-1 text-[10px] font-bold text-paper"></span>
         </a>
         <?php if (auth()->check()): ?>
           <?php $navUser = auth()->user(); ?>
@@ -227,14 +231,15 @@
   </div>
 </footer>
 
+<?php $hasStickyCartBar = str_starts_with(request()->path(), '/shop/'); ?>
 <a href="https://wa.me/910000000000" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"
-   class="pulse-ring soft-drift fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-paper shadow-lg hover:scale-110 transition-transform duration-150"
+   class="pulse-ring soft-drift fixed <?= $hasStickyCartBar ? 'bottom-24 lg:bottom-5' : 'bottom-5' ?> right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-paper shadow-lg hover:scale-110 transition-transform duration-150"
    style="background: linear-gradient(135deg, var(--mint), var(--skyb)); box-shadow: 0 12px 28px -8px rgba(16,185,129,0.5);">
   <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 6.3A8.9 8.9 0 0 0 12 4a9 9 0 0 0-7.9 13.4L3 21l3.7-1a9 9 0 0 0 5.3 1.7 9 9 0 0 0 9-9 8.9 8.9 0 0 0-2.4-6.4Zm-5.6 13.8a7.5 7.5 0 0 1-3.8-1l-.3-.2-2.2.6.6-2.2-.2-.3a7.5 7.5 0 1 1 6 3.1Zm4.1-5.6c-.2-.1-1.3-.7-1.5-.7-.2-.1-.3-.1-.5.1s-.6.7-.8.9-.3.2-.6 0a6.1 6.1 0 0 1-1.8-1.1 6.7 6.7 0 0 1-1.2-1.5c-.1-.2 0-.3.1-.5l.4-.4.2-.4a.5.5 0 0 0 0-.4c0-.1-.5-1.3-.7-1.7s-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.7 2.7 0 0 0-.8 2 4.7 4.7 0 0 0 1 2.5 10.6 10.6 0 0 0 4.1 3.7 4.7 4.7 0 0 0 2.9.6 2.5 2.5 0 0 0 1.6-1.1 1.9 1.9 0 0 0 .1-1.1c0-.2-.2-.2-.4-.4Z"/></svg>
 </a>
 
 <div x-data="{ visible: !localStorage.getItem('petshop_cookie_consent') }" x-show="visible" x-cloak x-transition.origin.bottom
-     class="glass fixed inset-x-3 sm:inset-x-6 bottom-3 z-50 rounded-3xl px-5 py-4 sm:px-6" style="background: rgba(36, 27, 63, 0.85); border-color: rgba(255,255,255,0.15);">
+     class="glass fixed inset-x-3 sm:inset-x-6 <?= $hasStickyCartBar ? 'bottom-24 lg:bottom-3' : 'bottom-3' ?> z-50 rounded-3xl px-5 py-4 sm:px-6" style="background: rgba(36, 27, 63, 0.85); border-color: rgba(255,255,255,0.15);">
   <div class="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-3">
     <p class="flex items-center gap-3 text-sm text-paper/85">
       <span class="icon-chip icon-chip-plum shrink-0"><?= icon('info', 'h-4 w-4') ?></span>
@@ -243,6 +248,28 @@
     <button type="button" @click="localStorage.setItem('petshop_cookie_consent','1'); visible = false"
             class="btn btn-sm shrink-0">Got it</button>
   </div>
+</div>
+
+<div x-data="{ toasts: [] }"
+     x-init="window.addEventListener('petshop-toast', (e) => {
+       const id = Date.now() + Math.random();
+       toasts.push({ id, type: e.detail.type ?? 'success', message: e.detail.message });
+       setTimeout(() => { toasts = toasts.filter((t) => t.id !== id); }, 3000);
+     })"
+     class="fixed top-20 inset-x-3 sm:inset-x-auto sm:right-4 z-[60] flex flex-col items-center sm:items-end gap-2 pointer-events-none"
+     aria-live="polite">
+  <template x-for="t in toasts" :key="t.id">
+    <div class="glass pointer-events-auto rounded-2xl px-4 py-3 text-sm font-medium flex items-center gap-2.5 max-w-sm"
+         :class="t.type === 'error' ? 'text-[#7a1a12]' : 'text-[#0b3d2e]'"
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+      <span class="icon-chip !w-7 !h-7 shrink-0" :class="t.type === 'error' ? 'icon-chip-leash' : 'icon-chip-fern'">
+        <svg x-show="t.type !== 'error'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg x-show="t.type === 'error'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L1 21h22L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17.3" r="0.9" fill="currentColor" stroke="none"/></svg>
+      </span>
+      <span x-text="t.message"></span>
+    </div>
+  </template>
 </div>
 
 </body>

@@ -45,11 +45,22 @@ final class CartController extends Controller
 
         $variant = ProductVariant::find($variantId);
         if ($variant === null || (int) $variant['product_id'] !== $productId) {
+            if ($request->wantsJson()) {
+                \App\Core\Response::json(['message' => "That item couldn't be added — it may no longer be available."], 422);
+            }
             flash('error', "That item couldn't be added — it may no longer be available.");
             back();
         }
 
         $this->carts->addItem((int) $cart['id'], $productId, $variantId, $qty);
+
+        if ($request->wantsJson()) {
+            \App\Core\Response::json([
+                'message' => 'Added to cart.',
+                'cartCount' => Cart::itemCount((int) $cart['id']),
+            ]);
+        }
+
         flash('success', 'Added to cart.');
         $this->redirect('/cart');
     }
