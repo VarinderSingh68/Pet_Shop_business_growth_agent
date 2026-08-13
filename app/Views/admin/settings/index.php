@@ -100,4 +100,22 @@
   <button type="submit" class="btn btn-primary">Save settings</button>
 </form>
 
+<div class="max-w-3xl mt-6 grid sm:grid-cols-3 gap-4">
+  <a href="/admin/roles" class="card-tag card-tag--pop p-5 bg-white block">
+    <span class="icon-chip icon-chip-plum"><?= icon('shield-check', 'h-4 w-4') ?></span>
+    <p class="font-display font-semibold mt-3">Roles &amp; permissions</p>
+    <p class="text-xs text-ink/50 mt-1">Choose what each staff role can access.</p>
+  </a>
+  <a href="/admin/activity" class="card-tag card-tag--pop p-5 bg-white block">
+    <span class="icon-chip icon-chip-info"><?= icon('clock', 'h-4 w-4') ?></span>
+    <p class="font-display font-semibold mt-3">Activity log</p>
+    <p class="text-xs text-ink/50 mt-1">See what staff have changed, and when.</p>
+  </a>
+  <a href="/admin/security" class="card-tag card-tag--pop p-5 bg-white block">
+    <span class="icon-chip icon-chip-fern"><?= icon('shield-check', 'h-4 w-4') ?></span>
+    <p class="font-display font-semibold mt-3">Your security</p>
+    <p class="text-xs text-ink/50 mt-1">Set up two-factor authentication.</p>
+  </a>
+</div>
+
 <?php \App\Core\View::stop(); ?>

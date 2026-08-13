@@ -155,6 +155,142 @@ final class ProductController extends Controller
         $this->redirect('/admin/catalogue');
     }
 
+    // --- CSV import -----------------------------------------------------
+
+    private const IMPORT_COLUMNS = ['name', 'category', 'brand', 'pet_type', 'life_stage', 'sku', 'price', 'stock_quantity'];
+
+    public function importForm(Request $request): void
+    {
+        $this->view('admin/catalogue/products/import', [
+            'title' => 'Import products',
+            'columns' => self::IMPORT_COLUMNS,
+        ]);
+    }
+
+    public function import(Request $request): void
+    {
+        $file = $request->file('csv');
+        if ($file === null) {
+            flash('error', 'Please choose a CSV file.');
+            back();
+        }
+
+        $handle = fopen($file['tmp_name'], 'r');
+        if ($handle === false) {
+            flash('error', "Couldn't read that file.");
+            back();
+        }
+
+        $header = fgetcsv($handle, 0, ',', '"', '\\');
+        if ($header === false) {
+            fclose($handle);
+            flash('error', 'The CSV file is empty.');
+            back();
+        }
+        $header = array_map(static fn ($h) => strtolower(trim((string) $h)), $header);
+
+        $created = 0;
+        $errors = [];
+        $rowNumber = 1;
+
+        while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
+            $rowNumber++;
+            if (count(array_filter($row, static fn ($v) => trim((string) $v) !== '')) === 0) {
+                continue;
+            }
+
+            $data = [];
+            foreach ($header as $i => $key) {
+                $data[$key] = trim((string) ($row[$i] ?? ''));
+            }
+
+            $error = $this->importRow($data);
+            if ($error !== null) {
+                $errors[] = "Row {$rowNumber}: {$error}";
+                continue;
+            }
+
+            $created++;
+        }
+
+        fclose($handle);
+
+        if ($created > 0) {
+            flash('success', "Imported {$created} product(s).");
+        }
+        if ($errors !== []) {
+            flash('error', count($errors) . ' row(s) had problems: ' . implode(' | ', array_slice($errors, 0, 10)) . (count($errors) > 10 ? ' …' : ''));
+        }
+        if ($created === 0 && $errors === []) {
+            flash('error', 'No rows found to import.');
+        }
+
+        $this->redirect('/admin/catalogue');
+    }
+
+    /** @param array<string, string> $data @return string|null error message, or null on success */
+    private function importRow(array $data): ?string
+    {
+        foreach (['name', 'category', 'pet_type', 'life_stage', 'sku', 'price'] as $required) {
+            if (($data[$required] ?? '') === '') {
+                return "missing {$required}";
+            }
+        }
+
+        if (!in_array($data['pet_type'], ['dog', 'cat', 'bird', 'fish', 'small_pet', 'other'], true)) {
+            return "invalid pet_type '{$data['pet_type']}'";
+        }
+        if (!in_array($data['life_stage'], ['puppy_kitten', 'adult', 'senior', 'all'], true)) {
+            return "invalid life_stage '{$data['life_stage']}'";
+        }
+        if (!is_numeric($data['price'])) {
+            return 'price must be a number';
+        }
+
+        $db = Database::instance();
+
+        $category = $db->selectOne('SELECT id FROM categories WHERE LOWER(name) = LOWER(:name)', ['name' => $data['category']]);
+        if ($category === null) {
+            return "category '{$data['category']}' not found";
+        }
+
+        $brandId = null;
+        if (($data['brand'] ?? '') !== '') {
+            $brand = $db->selectOne('SELECT id FROM brands WHERE LOWER(name) = LOWER(:name)', ['name' => $data['brand']]);
+            if ($brand === null) {
+                return "brand '{$data['brand']}' not found";
+            }
+            $brandId = (int) $brand['id'];
+        }
+
+        $sku = strtoupper($data['sku']);
+        if ($db->selectOne('SELECT id FROM product_variants WHERE sku = :sku', ['sku' => $sku]) !== null) {
+            return "sku '{$sku}' already exists";
+        }
+
+        $productId = Product::create([
+            'name' => $data['name'],
+            'slug' => $this->uniqueSlug($data['name']),
+            'category_id' => (int) $category['id'],
+            'brand_id' => $brandId,
+            'pet_type' => $data['pet_type'],
+            'life_stage' => $data['life_stage'],
+            'status' => 'draft',
+        ]);
+
+        ProductVariant::create([
+            'product_id' => $productId,
+            'sku' => $sku,
+            'label' => 'Standard',
+            'price_paise' => (int) round(((float) $data['price']) * 100),
+            'stock_quantity' => (int) ($data['stock_quantity'] !== '' ? $data['stock_quantity'] : 0),
+            'low_stock_threshold' => 5,
+            'is_default' => 1,
+        ]);
+
+        return null;
+    }
+
     // --- Variants -----------------------------------------------------
 
     public function storeVariant(Request $request, string $productId): void

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\Admin\ActivityController;
 use App\Controllers\Admin\AuthController as AdminAuthController;
 use App\Controllers\Admin\BrandController;
 use App\Controllers\Admin\CategoryController;
@@ -14,6 +15,8 @@ use App\Controllers\Admin\MarketingController;
 use App\Controllers\Admin\OrderController;
 use App\Controllers\Admin\ProductController;
 use App\Controllers\Admin\ReportController;
+use App\Controllers\Admin\RoleController;
+use App\Controllers\Admin\SecurityController;
 use App\Controllers\Admin\ServiceController;
 use App\Controllers\Admin\SettingsController;
 use App\Core\Router;
@@ -22,6 +25,8 @@ use App\Core\Router;
 
 $router->get('/admin/login', [AdminAuthController::class, 'showLogin'], ['guest']);
 $router->post('/admin/login', [AdminAuthController::class, 'login'], ['guest', 'csrf', 'throttle:10,1']);
+$router->get('/admin/login/2fa', [AdminAuthController::class, 'showTwoFactorChallenge'], ['guest']);
+$router->post('/admin/login/2fa', [AdminAuthController::class, 'verifyTwoFactor'], ['guest', 'csrf', 'throttle:10,1']);
 $router->post('/admin/logout', [AdminAuthController::class, 'logout'], ['admin', 'csrf']);
 $router->post('/admin/customers/stop-impersonating', [CustomerController::class, 'stopImpersonate'], ['auth', 'csrf']);
 
@@ -40,6 +45,9 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->post('/catalogue/products/{id}/variants/{variantId}/delete', [ProductController::class, 'destroyVariant'], ['csrf']);
     $router->post('/catalogue/products/{id}/images', [ProductController::class, 'storeImage'], ['csrf']);
     $router->post('/catalogue/products/{id}/images/{imageId}/delete', [ProductController::class, 'destroyImage'], ['csrf']);
+
+    $router->get('/catalogue/import', [ProductController::class, 'importForm']);
+    $router->post('/catalogue/import', [ProductController::class, 'import'], ['csrf']);
 
     $router->get('/catalogue/categories', [CategoryController::class, 'index']);
     $router->post('/catalogue/categories', [CategoryController::class, 'store'], ['csrf']);
@@ -114,6 +122,16 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
 
     $router->get('/settings', [SettingsController::class, 'index']);
     $router->post('/settings', [SettingsController::class, 'update'], ['csrf']);
+
+    $router->get('/roles', [RoleController::class, 'index']);
+    $router->post('/roles/{id}', [RoleController::class, 'update'], ['csrf']);
+
+    $router->get('/activity', [ActivityController::class, 'index']);
+
+    $router->get('/security', [SecurityController::class, 'index']);
+    $router->post('/security/2fa/setup', [SecurityController::class, 'setup'], ['csrf']);
+    $router->post('/security/2fa/confirm', [SecurityController::class, 'confirm'], ['csrf']);
+    $router->post('/security/2fa/disable', [SecurityController::class, 'disable'], ['csrf']);
 
     $router->get('/services', function () { redirect('/admin/services/staff'); });
     $router->get('/services/staff', [ServiceController::class, 'staff']);

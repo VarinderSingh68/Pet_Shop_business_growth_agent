@@ -15,19 +15,37 @@ final class Auth
 
     public function attempt(string $email, string $password): bool
     {
-        $user = User::findByEmail($email);
+        $user = $this->validateCredentials($email, $password);
 
-        if ($user === null || !User::verifyPassword($user, $password)) {
-            return false;
-        }
-
-        if ((int) $user['is_active'] === 0) {
+        if ($user === null) {
             return false;
         }
 
         $this->login($user);
 
         return true;
+    }
+
+    /**
+     * Checks email/password/active-status without establishing a session —
+     * used by flows (like the admin 2FA challenge) that need to confirm
+     * credentials before deciding whether a second factor is required.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function validateCredentials(string $email, string $password): ?array
+    {
+        $user = User::findByEmail($email);
+
+        if ($user === null || !User::verifyPassword($user, $password)) {
+            return null;
+        }
+
+        if ((int) $user['is_active'] === 0) {
+            return null;
+        }
+
+        return $user;
     }
 
     public function login(array $user): void

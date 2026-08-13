@@ -18,7 +18,10 @@ $totalPages = max(1, (int) ceil($total / $perPage));
     <a href="/admin/catalogue/categories" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1 border-b-2 border-transparent">Categories</a>
     <a href="/admin/catalogue/brands" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1 border-b-2 border-transparent">Brands</a>
   </div>
-  <a href="/admin/catalogue/products/create" class="btn btn-primary btn-sm"><?= icon('plus', 'h-4 w-4') ?> Add product</a>
+  <div class="flex gap-2">
+    <a href="/admin/catalogue/import" class="btn btn-secondary btn-sm"><?= icon('upload', 'h-4 w-4') ?> Import CSV</a>
+    <a href="/admin/catalogue/products/create" class="btn btn-primary btn-sm"><?= icon('plus', 'h-4 w-4') ?> Add product</a>
+  </div>
 </div>
 
 <form method="GET" action="/admin/catalogue" class="flex flex-wrap gap-2 mb-4">
