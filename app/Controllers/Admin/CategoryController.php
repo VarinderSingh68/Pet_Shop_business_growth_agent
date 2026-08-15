@@ -22,7 +22,7 @@ final class CategoryController extends Controller
 
     public function store(Request $request): void
     {
-        $data = $request->only(['name', 'parent_id', 'description', 'icon', 'sort_order']);
+        $data = $request->only(['name', 'parent_id', 'description', 'icon', 'sort_order', 'meta_title', 'meta_description']);
 
         $validator = Validator::make($data, ['name' => 'required|max:150']);
         if ($validator->fails()) {
@@ -37,6 +37,8 @@ final class CategoryController extends Controller
             'description' => !empty($data['description']) ? $data['description'] : null,
             'icon' => !empty($data['icon']) ? $data['icon'] : 'other',
             'sort_order' => (int) ($data['sort_order'] ?? 0),
+            'meta_title' => !empty($data['meta_title']) ? $data['meta_title'] : null,
+            'meta_description' => !empty($data['meta_description']) ? $data['meta_description'] : null,
             'is_active' => 1,
         ]);
 
@@ -46,7 +48,7 @@ final class CategoryController extends Controller
 
     public function update(Request $request, string $id): void
     {
-        $data = $request->only(['name', 'parent_id', 'description', 'icon', 'sort_order', 'is_active']);
+        $data = $request->only(['name', 'parent_id', 'description', 'icon', 'sort_order', 'is_active', 'meta_title', 'meta_description']);
 
         Category::updateWhere((int) $id, [
             'name' => $data['name'],
@@ -55,6 +57,8 @@ final class CategoryController extends Controller
             'description' => !empty($data['description']) ? $data['description'] : null,
             'icon' => !empty($data['icon']) ? $data['icon'] : 'other',
             'sort_order' => (int) ($data['sort_order'] ?? 0),
+            'meta_title' => !empty($data['meta_title']) ? $data['meta_title'] : null,
+            'meta_description' => !empty($data['meta_description']) ? $data['meta_description'] : null,
             'is_active' => !empty($data['is_active']) ? 1 : 0,
         ]);
 

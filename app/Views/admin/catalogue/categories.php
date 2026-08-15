@@ -9,12 +9,13 @@
   <a href="/admin/catalogue" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Products</a>
   <a href="/admin/catalogue/categories" class="text-sm font-semibold border-b-2 border-ink pb-1">Categories</a>
   <a href="/admin/catalogue/brands" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Brands</a>
+  <a href="/admin/catalogue/reviews" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Reviews</a>
 </div>
 
 <div class="grid lg:grid-cols-[1fr_320px] gap-6">
   <div class="border-2 border-ink bg-white overflow-x-auto">
     <table class="admin-table w-full text-sm">
-      <thead><tr class="border-b-2 border-ink"><th class="p-2 text-left">Name</th><th class="p-2 text-left">Parent</th><th class="p-2 text-left">Active</th><th class="p-2"></th></tr></thead>
+      <thead><tr class="border-b-2 border-ink"><th class="p-2 text-left">Name</th><th class="p-2 text-left">Parent</th><th class="p-2 text-left">Meta title</th><th class="p-2 text-left">Meta description</th><th class="p-2 text-left">Active</th><th class="p-2"></th></tr></thead>
       <tbody>
         <?php foreach ($categories as $c): ?>
           <tr class="border-b border-mist">
@@ -30,6 +31,8 @@
                   <?php endforeach; ?>
                 </select>
               </td>
+              <td class="p-2"><input type="text" name="meta_title" value="<?= e($c['meta_title'] ?? '') ?>" placeholder="Defaults to name" class="border border-ink px-1.5 py-1 w-44"></td>
+              <td class="p-2"><input type="text" name="meta_description" value="<?= e($c['meta_description'] ?? '') ?>" placeholder="Defaults to description" class="border border-ink px-1.5 py-1 w-56"></td>
               <td class="p-2"><input type="checkbox" name="is_active" value="1" <?= $c['is_active'] ? 'checked' : '' ?>></td>
               <td class="p-2 whitespace-nowrap">
                 <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold text-fern hover:underline"><?= icon('check', 'h-3 w-3') ?> Save</button>

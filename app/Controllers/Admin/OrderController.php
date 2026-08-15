@@ -65,6 +65,7 @@ final class OrderController extends Controller
         $customer = $order['user_id'] !== null ? $db->selectOne('SELECT * FROM users WHERE id = :id', ['id' => $order['user_id']]) : null;
         $payments = $db->select('SELECT * FROM payments WHERE order_id = :id ORDER BY id DESC', ['id' => $id]);
         $refunds = $db->select('SELECT * FROM refunds WHERE order_id = :id ORDER BY id DESC', ['id' => $id]);
+        $shipment = $db->selectOne('SELECT * FROM shipments WHERE order_id = :id ORDER BY id DESC LIMIT 1', ['id' => $id]);
 
         $this->view('admin/orders/show', [
             'title' => 'Order ' . $order['order_number'],
@@ -74,8 +75,50 @@ final class OrderController extends Controller
             'history' => Order::statusHistory((int) $id),
             'payments' => $payments,
             'refunds' => $refunds,
+            'shipment' => $shipment,
             'statuses' => self::STATUSES,
         ]);
+    }
+
+    public function saveShipment(Request $request, string $id): void
+    {
+        $order = Order::find((int) $id);
+        if ($order === null) {
+            abort(404);
+        }
+
+        $carrier = trim((string) $request->input('carrier', ''));
+        $trackingNumber = trim((string) $request->input('tracking_number', ''));
+        $status = (string) $request->input('shipment_status', 'pending');
+        if (!in_array($status, ['pending', 'packed', 'shipped', 'delivered', 'returned'], true)) {
+            $status = 'pending';
+        }
+
+        $db = Database::instance();
+        $existing = $db->selectOne('SELECT * FROM shipments WHERE order_id = :id ORDER BY id DESC LIMIT 1', ['id' => $id]);
+
+        $wasShipped = $existing !== null && $existing['status'] === 'shipped';
+        $wasDelivered = $existing !== null && $existing['status'] === 'delivered';
+
+        $data = [
+            'carrier' => $carrier !== '' ? $carrier : null,
+            'tracking_number' => $trackingNumber !== '' ? $trackingNumber : null,
+            'status' => $status,
+            'shipped_at' => $status === 'shipped' && !$wasShipped ? now() : ($existing['shipped_at'] ?? null),
+            'delivered_at' => $status === 'delivered' && !$wasDelivered ? now() : ($existing['delivered_at'] ?? null),
+            'updated_at' => now(),
+        ];
+
+        if ($existing !== null) {
+            $db->update('shipments', $data, 'id = :id', ['id' => $existing['id']]);
+        } else {
+            $data['order_id'] = $id;
+            $data['created_at'] = now();
+            $db->insert('shipments', $data);
+        }
+
+        flash('success', 'Shipment details saved.');
+        $this->redirect('/admin/orders/' . $id);
     }
 
     public function updateStatus(Request $request, string $id): void

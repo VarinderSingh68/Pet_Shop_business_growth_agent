@@ -10,11 +10,18 @@ $isEdit = $post !== null;
 
 <a href="/admin/content/blog" class="text-sm text-ink/50 hover:text-leash">&larr; Posts</a>
 
-<form method="POST" action="<?= $isEdit ? '/admin/content/blog/' . (int) $post['id'] : '/admin/content/blog' ?>" class="mt-3 max-w-2xl card-tag p-5 bg-white space-y-4">
+<form method="POST" action="<?= $isEdit ? '/admin/content/blog/' . (int) $post['id'] : '/admin/content/blog' ?>" enctype="multipart/form-data" class="mt-3 max-w-2xl card-tag p-5 bg-white space-y-4">
   <?= csrf_field() ?>
   <div>
     <label for="title" class="block text-sm font-semibold mb-1">Title</label>
     <input id="title" type="text" name="title" required value="<?= e($post['title'] ?? '') ?>" class="input">
+  </div>
+  <div>
+    <label for="cover_image" class="block text-sm font-semibold mb-1">Cover image</label>
+    <?php if (!empty($post['cover_image_path'] ?? null)): ?>
+      <img src="<?= e(media_url($post['cover_image_path'])) ?>" alt="" class="mb-2 h-32 w-full max-w-xs object-cover border-2 border-ink">
+    <?php endif; ?>
+    <input id="cover_image" type="file" name="cover_image" accept="image/jpeg,image/png,image/webp" class="input">
   </div>
   <div>
     <label for="blog_category_id" class="block text-sm font-semibold mb-1">Category</label>

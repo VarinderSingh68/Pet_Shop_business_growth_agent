@@ -176,6 +176,20 @@ final class DeveloperController extends Controller
         exit;
     }
 
+    // --- Notifications ----------------------------------------------------
+
+    public function notifications(Request $request): void
+    {
+        $this->view('admin/dev/notifications', [
+            'title' => 'Notifications',
+            'notifications' => Database::instance()->select(
+                'SELECT n.*, u.name AS user_name FROM notifications n
+                 LEFT JOIN users u ON u.id = n.user_id
+                 ORDER BY n.id DESC LIMIT 150',
+            ),
+        ]);
+    }
+
     // --- Webhooks -------------------------------------------------------
 
     public function webhooks(Request $request): void

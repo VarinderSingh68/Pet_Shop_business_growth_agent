@@ -37,6 +37,7 @@
           ['href' => '/admin/inventory', 'icon' => 'layers', 'label' => 'Inventory', 'match' => '/admin/inventory'],
           ['href' => '/admin/orders', 'icon' => 'cart', 'label' => 'Orders', 'match' => '/admin/orders'],
           ['href' => '/admin/customers', 'icon' => 'users', 'label' => 'Customers', 'match' => '/admin/customers'],
+          ['href' => '/admin/support', 'icon' => 'life-buoy', 'label' => 'Support', 'match' => '/admin/support'],
           ['href' => '/admin/services', 'icon' => 'calendar', 'label' => 'Services', 'match' => '/admin/services'],
           ['href' => '/admin/marketing', 'icon' => 'megaphone', 'label' => 'Marketing', 'match' => '/admin/marketing'],
           ['href' => '/admin/content', 'icon' => 'document', 'label' => 'Content', 'match' => '/admin/content'],

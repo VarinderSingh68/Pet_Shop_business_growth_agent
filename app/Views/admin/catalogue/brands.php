@@ -9,6 +9,7 @@
   <a href="/admin/catalogue" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Products</a>
   <a href="/admin/catalogue/categories" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Categories</a>
   <a href="/admin/catalogue/brands" class="text-sm font-semibold border-b-2 border-ink pb-1">Brands</a>
+  <a href="/admin/catalogue/reviews" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Reviews</a>
 </div>
 
 <div class="grid lg:grid-cols-[1fr_320px] gap-6">

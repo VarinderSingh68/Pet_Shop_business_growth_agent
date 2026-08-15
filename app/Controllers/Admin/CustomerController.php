@@ -10,6 +10,7 @@ use App\Core\Database;
 use App\Core\Request;
 use App\Core\Session;
 use App\Models\Address;
+use App\Models\LoyaltyPoint;
 use App\Models\Order;
 use App\Models\Pet;
 use App\Models\User;
@@ -81,7 +82,36 @@ final class CustomerController extends Controller
                 'SELECT * FROM activity_logs WHERE user_id = :id ORDER BY id DESC LIMIT 20',
                 ['id' => $id],
             ),
+            'loyaltyBalance' => LoyaltyPoint::balance((int) $id),
+            'loyaltyLedger' => LoyaltyPoint::ledgerFor((int) $id, 20),
         ]);
+    }
+
+    public function adjustLoyaltyPoints(Request $request, string $id): void
+    {
+        $customer = User::find((int) $id);
+        if ($customer === null) {
+            abort(404);
+        }
+
+        $points = (int) $request->input('points', 0);
+        $note = trim((string) $request->input('note', ''));
+
+        if ($points === 0) {
+            flash('error', 'Enter a non-zero point amount.');
+            back();
+        }
+
+        LoyaltyPoint::create([
+            'user_id' => (int) $id,
+            'points' => $points,
+            'type' => 'adjusted',
+            'note' => $note !== '' ? $note : 'Manual adjustment by ' . (App::auth()->user()['name'] ?? 'admin'),
+            'created_at' => now(),
+        ]);
+
+        flash('success', 'Loyalty points adjusted.');
+        $this->redirect('/admin/customers/' . $id);
     }
 
     /**

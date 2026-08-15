@@ -13,6 +13,7 @@ $tools = [
     ['href' => '/admin/dev/queries', 'label' => 'Query profiler', 'desc' => 'Slowest queries with bindings'],
     ['href' => '/admin/dev/cron', 'label' => 'Cron monitor', 'desc' => 'Growth Agent run history, manual trigger'],
     ['href' => '/admin/dev/mail', 'label' => 'Mail log', 'desc' => 'Every email sent, with HTML preview'],
+    ['href' => '/admin/dev/notifications', 'label' => 'Notifications', 'desc' => 'Order/system notifications sent to customers'],
     ['href' => '/admin/dev/webhooks', 'label' => 'Webhooks', 'desc' => 'Delivery log, signature status, replay'],
     ['href' => '/admin/dev/api-explorer', 'label' => 'API explorer', 'desc' => 'Every registered API route'],
     ['href' => '/admin/dev/api-tokens', 'label' => 'API tokens', 'desc' => 'Issue and revoke Bearer tokens'],

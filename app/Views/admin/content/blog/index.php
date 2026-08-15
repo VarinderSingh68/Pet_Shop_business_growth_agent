@@ -9,6 +9,7 @@
   <div class="flex gap-2">
     <a href="/admin/content/blog" class="text-sm font-semibold border-b-2 border-ink pb-1">Posts</a>
     <a href="/admin/content/blog/categories" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Categories</a>
+    <a href="/admin/content/blog/comments" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Comments</a>
     <a href="/admin/content/pages" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Pages</a>
     <a href="/admin/content/faqs" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">FAQs</a>
     <a href="/admin/content/testimonials" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Testimonials</a>

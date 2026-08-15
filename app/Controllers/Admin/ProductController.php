@@ -398,6 +398,64 @@ final class ProductController extends Controller
         $this->redirect('/admin/catalogue/products/' . $productId . '/edit');
     }
 
+    // --- Reviews ------------------------------------------------------------
+
+    public function reviews(Request $request): void
+    {
+        $status = (string) $request->query('status', 'pending');
+        $where = in_array($status, ['pending', 'approved', 'flagged'], true) ? 'WHERE r.status = :status' : '';
+
+        $reviews = Database::instance()->select(
+            "SELECT r.*, p.name AS product_name, p.slug AS product_slug, u.name AS reviewer_name
+             FROM reviews r
+             JOIN products p ON p.id = r.product_id
+             LEFT JOIN users u ON u.id = r.user_id
+             {$where}
+             ORDER BY r.created_at DESC LIMIT 200",
+            $where !== '' ? ['status' => $status] : [],
+        );
+
+        $counts = Database::instance()->select('SELECT status, COUNT(*) AS c FROM reviews GROUP BY status');
+
+        $this->view('admin/catalogue/reviews', [
+            'title' => 'Reviews',
+            'reviews' => $reviews,
+            'status' => $status,
+            'countsByStatus' => array_column($counts, 'c', 'status'),
+        ]);
+    }
+
+    public function updateReviewStatus(Request $request, string $id): void
+    {
+        $status = (string) $request->input('status', '');
+        if (!in_array($status, ['pending', 'approved', 'flagged'], true)) {
+            back();
+        }
+
+        $review = Database::instance()->selectOne('SELECT product_id FROM reviews WHERE id = :id', ['id' => $id]);
+        if ($review === null) {
+            abort(404);
+        }
+
+        Database::instance()->update('reviews', ['status' => $status], 'id = :id', ['id' => $id]);
+        Product::recalculateRating((int) $review['product_id']);
+
+        flash('success', 'Review updated.');
+        back();
+    }
+
+    public function destroyReview(Request $request, string $id): void
+    {
+        $review = Database::instance()->selectOne('SELECT product_id FROM reviews WHERE id = :id', ['id' => $id]);
+        if ($review !== null) {
+            Database::instance()->delete('reviews', 'id = :id', ['id' => $id]);
+            Product::recalculateRating((int) $review['product_id']);
+        }
+
+        flash('success', 'Review deleted.');
+        back();
+    }
+
     // --- Helpers ----------------------------------------------------------
 
     private function validatedProductData(Request $request): array

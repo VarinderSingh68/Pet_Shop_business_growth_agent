@@ -40,8 +40,17 @@ final class CatalogueController extends Controller
 
         $result = $this->catalogue->search($filters);
 
+        $activeCategory = !empty($filters['category']) ? Category::findBySlug((string) $filters['category']) : null;
+        $title = match (true) {
+            !empty($filters['q']) => 'Search: ' . $filters['q'],
+            $activeCategory !== null => $activeCategory['meta_title'] ?: $activeCategory['name'],
+            default => 'Shop',
+        };
+        $description = $activeCategory !== null ? ($activeCategory['meta_description'] ?: $activeCategory['description']) : null;
+
         $this->view('site/catalogue/index', [
-            'title' => !empty($filters['q']) ? 'Search: ' . $filters['q'] : 'Shop',
+            'title' => $title,
+            'description' => $description,
             'result' => $result,
             'filters' => $filters,
             'categories' => Category::allActive(),
@@ -66,8 +75,8 @@ final class CatalogueController extends Controller
         $related = $frequentlyBoughtWith !== [] ? $frequentlyBoughtWith : Product::relatedTo($product);
 
         $this->view('site/catalogue/show', [
-            'title' => $product['name'],
-            'description' => $product['short_description'],
+            'title' => $product['meta_title'] ?: $product['name'],
+            'description' => $product['meta_description'] ?: $product['short_description'],
             'product' => $product,
             'variants' => $variants,
             'images' => $images,

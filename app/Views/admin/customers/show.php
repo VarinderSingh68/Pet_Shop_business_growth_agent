@@ -8,6 +8,8 @@
 /** @var array $addresses */
 /** @var int $lifetimeValue */
 /** @var array $activity */
+/** @var int $loyaltyBalance */
+/** @var array $loyaltyLedger */
 ?>
 
 <a href="/admin/customers" class="text-sm text-ink/50 hover:text-leash">&larr; Customers</a>
@@ -24,10 +26,11 @@
   </form>
 </div>
 
-<div class="mt-6 grid sm:grid-cols-3 gap-4">
+<div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
   <div class="card-tag p-4 bg-white"><p class="text-xs uppercase text-ink/50 font-semibold">Orders</p><p class="font-display text-2xl font-bold mt-1"><?= count($orders) ?></p></div>
   <div class="card-tag p-4 bg-white"><p class="text-xs uppercase text-ink/50 font-semibold">Lifetime value</p><p class="font-display text-2xl font-bold mt-1"><?= money($lifetimeValue) ?></p></div>
   <div class="card-tag p-4 bg-white"><p class="text-xs uppercase text-ink/50 font-semibold">Pets</p><p class="font-display text-2xl font-bold mt-1"><?= count($pets) ?></p></div>
+  <div class="card-tag p-4 bg-white"><p class="text-xs uppercase text-ink/50 font-semibold">Loyalty points</p><p class="font-display text-2xl font-bold mt-1"><?= $loyaltyBalance ?></p></div>
 </div>
 
 <div class="mt-6 grid lg:grid-cols-2 gap-6">
@@ -66,6 +69,28 @@
       <?php endforeach; ?>
       <?php if ($addresses === []): ?><li class="text-ink/50">No saved addresses.</li><?php endif; ?>
     </ul>
+  </div>
+
+  <div class="card-tag p-5 bg-white">
+    <p class="font-display font-semibold">Loyalty points — balance: <?= $loyaltyBalance ?></p>
+    <ul class="mt-3 space-y-2 text-sm max-h-48 overflow-y-auto">
+      <?php foreach ($loyaltyLedger as $l): ?>
+        <li class="flex justify-between border-b border-mist pb-2">
+          <span><?= e($l['note'] ?? ucfirst($l['type'])) ?></span>
+          <span class="font-semibold <?= $l['points'] < 0 ? 'text-leash' : 'text-fern' ?>"><?= $l['points'] > 0 ? '+' : '' ?><?= (int) $l['points'] ?></span>
+        </li>
+      <?php endforeach; ?>
+      <?php if ($loyaltyLedger === []): ?><li class="text-ink/50">No points activity yet.</li><?php endif; ?>
+    </ul>
+    <form method="POST" action="/admin/customers/<?= (int) $customer['id'] ?>/loyalty" class="mt-4 flex flex-wrap items-end gap-2">
+      <?= csrf_field() ?>
+      <div>
+        <label for="points" class="block text-xs font-semibold mb-1">Adjust by</label>
+        <input id="points" type="number" name="points" placeholder="±points" required class="w-24 input text-sm">
+      </div>
+      <input type="text" name="note" placeholder="Reason (optional)" class="flex-1 min-w-[140px] input text-sm">
+      <button type="submit" class="btn btn-secondary btn-sm">Apply</button>
+    </form>
   </div>
 
   <div class="card-tag p-5 bg-white">

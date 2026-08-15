@@ -8,6 +8,7 @@
 /** @var array $history */
 /** @var array $payments */
 /** @var array $refunds */
+/** @var array|null $shipment */
 /** @var array $statuses */
 ?>
 
@@ -116,6 +117,32 @@
       <p class="text-sm mt-2"><?= e($order['shipping_full_name']) ?><br>
         <?= e($order['shipping_line1']) ?><?= $order['shipping_line2'] ? ', ' . e($order['shipping_line2']) : '' ?><br>
         <?= e($order['shipping_city']) ?>, <?= e($order['shipping_state']) ?> <?= e($order['shipping_postal_code']) ?></p>
+    </div>
+
+    <div class="card-tag p-5 bg-white">
+      <p class="font-display font-semibold">Shipment</p>
+      <form method="POST" action="/admin/orders/<?= (int) $order['id'] ?>/shipment" class="mt-3 space-y-2">
+        <?= csrf_field() ?>
+        <div>
+          <label for="carrier" class="block text-xs font-semibold mb-1">Carrier</label>
+          <input id="carrier" type="text" name="carrier" value="<?= e($shipment['carrier'] ?? '') ?>" placeholder="e.g. Delhivery" class="input text-sm w-full">
+        </div>
+        <div>
+          <label for="tracking_number" class="block text-xs font-semibold mb-1">Tracking number</label>
+          <input id="tracking_number" type="text" name="tracking_number" value="<?= e($shipment['tracking_number'] ?? '') ?>" class="input text-sm w-full">
+        </div>
+        <div>
+          <label for="shipment_status" class="block text-xs font-semibold mb-1">Shipment status</label>
+          <select id="shipment_status" name="shipment_status" class="input text-sm w-full">
+            <?php foreach (['pending', 'packed', 'shipped', 'delivered', 'returned'] as $st): ?>
+              <option value="<?= $st ?>" <?= ($shipment['status'] ?? 'pending') === $st ? 'selected' : '' ?>><?= ucfirst($st) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <button type="submit" class="w-full btn btn-secondary btn-sm">Save shipment</button>
+      </form>
+      <?php if ($shipment !== null && $shipment['shipped_at']): ?><p class="text-xs text-ink/50 mt-2">Shipped <?= e($shipment['shipped_at']) ?></p><?php endif; ?>
+      <?php if ($shipment !== null && $shipment['delivered_at']): ?><p class="text-xs text-ink/50">Delivered <?= e($shipment['delivered_at']) ?></p><?php endif; ?>
     </div>
 
     <div class="card-tag p-5 bg-white">

@@ -30,7 +30,12 @@
   <?php else: ?>
     <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <?php foreach ($posts as $i => $post): ?>
-        <a href="/blog/<?= e($post['slug']) ?>" class="card-tag card-tag--pop p-5 group" data-reveal style="transition-delay:<?= ($i % 6) * 70 ?>ms">
+        <a href="/blog/<?= e($post['slug']) ?>" class="card-tag card-tag--pop group flex flex-col" data-reveal style="transition-delay:<?= ($i % 6) * 70 ?>ms">
+          <?php if (!empty($post['cover_image_path'])): ?>
+            <div class="-mx-5 -mt-5 mb-1 aspect-[16/9] overflow-hidden">
+              <img src="<?= e(media_url($post['cover_image_path'])) ?>" alt="" loading="lazy" class="w-full h-full object-cover">
+            </div>
+          <?php endif; ?>
           <?php if ($post['category_name']): ?><div class="card-tag__tab"><?= e($post['category_name']) ?></div><?php endif; ?>
           <h2 class="font-display text-lg font-semibold group-hover:text-[#7c3aed] transition-colors duration-150 <?= $post['category_name'] ? 'mt-6' : '' ?>"><?= e($post['title']) ?></h2>
           <p class="mt-2 text-sm text-ink/60"><?= e($post['excerpt'] ?? '') ?></p>

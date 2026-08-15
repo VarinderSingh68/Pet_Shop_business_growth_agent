@@ -14,9 +14,14 @@ use App\Models\BlogPost;
 use App\Models\Faq;
 use App\Models\Page;
 use App\Models\Testimonial;
+use App\Services\MediaService;
 
 final class ContentController extends Controller
 {
+    public function __construct(private readonly MediaService $media = new MediaService())
+    {
+    }
+
     // --- Blog -------------------------------------------------------------
 
     public function blogIndex(Request $request): void
@@ -57,6 +62,7 @@ final class ContentController extends Controller
         $data = $this->validatedPostData($request);
         $data['slug'] = slugify($data['title']);
         $data['author_user_id'] = App::auth()->id();
+        $data['cover_image_path'] = $this->uploadedCoverImage($request);
 
         $id = BlogPost::create($data);
         flash('success', 'Post created.');
@@ -66,9 +72,30 @@ final class ContentController extends Controller
     public function blogUpdate(Request $request, string $id): void
     {
         $data = $this->validatedPostData($request);
+
+        $newCover = $this->uploadedCoverImage($request);
+        if ($newCover !== null) {
+            $data['cover_image_path'] = $newCover;
+        }
+
         BlogPost::updateWhere((int) $id, $data);
         flash('success', 'Post updated.');
         $this->redirect('/admin/content/blog/' . $id . '/edit');
+    }
+
+    private function uploadedCoverImage(Request $request): ?string
+    {
+        $file = $request->file('cover_image');
+        if ($file === null) {
+            return null;
+        }
+
+        try {
+            return $this->media->storeImage($file, 'blog');
+        } catch (\RuntimeException $e) {
+            flash('error', $e->getMessage());
+            return null;
+        }
     }
 
     public function blogDestroy(Request $request, string $id): void
@@ -113,6 +140,50 @@ final class ContentController extends Controller
             flash('success', 'Category added.');
         }
         $this->redirect('/admin/content/blog/categories');
+    }
+
+    // --- Blog comments ----------------------------------------------------
+
+    public function blogComments(Request $request): void
+    {
+        $status = (string) $request->query('status', 'pending');
+        $where = in_array($status, ['pending', 'approved', 'flagged'], true) ? 'WHERE c.status = :status' : '';
+
+        $comments = Database::instance()->select(
+            "SELECT c.*, p.title AS post_title, p.slug AS post_slug
+             FROM blog_comments c JOIN blog_posts p ON p.id = c.blog_post_id
+             {$where}
+             ORDER BY c.created_at DESC LIMIT 200",
+            $where !== '' ? ['status' => $status] : [],
+        );
+
+        $counts = Database::instance()->select('SELECT status, COUNT(*) AS c FROM blog_comments GROUP BY status');
+
+        $this->view('admin/content/blog/comments', [
+            'title' => 'Blog comments',
+            'comments' => $comments,
+            'status' => $status,
+            'countsByStatus' => array_column($counts, 'c', 'status'),
+        ]);
+    }
+
+    public function updateBlogCommentStatus(Request $request, string $id): void
+    {
+        $status = (string) $request->input('status', '');
+        if (!in_array($status, ['pending', 'approved', 'flagged'], true)) {
+            back();
+        }
+
+        Database::instance()->update('blog_comments', ['status' => $status], 'id = :id', ['id' => $id]);
+        flash('success', 'Comment updated.');
+        back();
+    }
+
+    public function destroyBlogComment(Request $request, string $id): void
+    {
+        Database::instance()->delete('blog_comments', 'id = :id', ['id' => $id]);
+        flash('success', 'Comment deleted.');
+        back();
     }
 
     // --- Pages --------------------------------------------------------------

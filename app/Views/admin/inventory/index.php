@@ -8,6 +8,12 @@
 /** @var string $search */
 ?>
 
+<div class="flex gap-2 mb-4">
+  <a href="/admin/inventory" class="text-sm font-semibold border-b-2 border-ink pb-1">Stock</a>
+  <a href="/admin/inventory/suppliers" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Suppliers</a>
+  <a href="/admin/inventory/purchase-orders" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Purchase orders</a>
+</div>
+
 <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
   <form method="GET" action="/admin/inventory" class="flex flex-wrap gap-2">
     <input type="text" name="q" value="<?= e($search) ?>" placeholder="Search product or SKU" class="min-w-[220px] input text-sm">

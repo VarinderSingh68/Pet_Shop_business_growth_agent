@@ -6,11 +6,14 @@ namespace App\Controllers\Admin;
 
 use App\Core\App;
 use App\Core\Controller;
+use App\Core\Database;
 use App\Core\Request;
 use App\Core\Validator;
 use App\Models\Campaign;
 use App\Models\Coupon;
+use App\Models\GiftCard;
 use App\Models\GrowthAction;
+use App\Models\NewsletterSubscriber;
 use App\Models\Segment;
 use App\Services\Growth\CampaignService;
 use App\Services\Growth\CopilotService;
@@ -176,5 +179,143 @@ final class MarketingController extends Controller
             Coupon::updateWhere((int) $id, ['is_active' => $coupon['is_active'] ? 0 : 1]);
         }
         $this->redirect('/admin/marketing/coupons');
+    }
+
+    // --- Newsletter ---------------------------------------------------------
+
+    public function newsletter(Request $request): void
+    {
+        $subscribers = NewsletterSubscriber::all('created_at DESC');
+
+        $this->view('admin/marketing/newsletter', [
+            'title' => 'Newsletter subscribers',
+            'subscribers' => $subscribers,
+            'subscribedCount' => count(array_filter($subscribers, static fn (array $s) => $s['status'] === 'subscribed')),
+        ]);
+    }
+
+    public function exportNewsletter(Request $request): void
+    {
+        $subscribers = NewsletterSubscriber::where(['status' => 'subscribed'], 'created_at DESC');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="newsletter-subscribers.csv"');
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['Email', 'Subscribed at']);
+        foreach ($subscribers as $s) {
+            fputcsv($out, [$s['email'], $s['created_at']]);
+        }
+        fclose($out);
+        exit;
+    }
+
+    // --- Referrals ------------------------------------------------------------
+
+    public function referrals(Request $request): void
+    {
+        $referrals = Database::instance()->select(
+            'SELECT rf.*, ru.name AS referrer_name, ru.email AS referrer_email, rd.name AS referred_name
+             FROM referrals rf
+             JOIN users ru ON ru.id = rf.referrer_user_id
+             JOIN users rd ON rd.id = rf.referred_user_id
+             ORDER BY rf.created_at DESC LIMIT 200',
+        );
+
+        $stats = Database::instance()->selectOne(
+            "SELECT COUNT(*) AS total,
+                    SUM(CASE WHEN status = 'rewarded' THEN 1 ELSE 0 END) AS rewarded,
+                    SUM(CASE WHEN status = 'rewarded' THEN reward_paise ELSE 0 END) AS reward_total_paise
+             FROM referrals",
+        );
+
+        $this->view('admin/marketing/referrals', [
+            'title' => 'Referrals',
+            'referrals' => $referrals,
+            'stats' => $stats,
+        ]);
+    }
+
+    // --- Gift cards ---------------------------------------------------------
+
+    public function giftCards(Request $request): void
+    {
+        $this->view('admin/marketing/gift-cards', [
+            'title' => 'Gift cards',
+            'giftCards' => GiftCard::all('created_at DESC'),
+        ]);
+    }
+
+    public function storeGiftCard(Request $request): void
+    {
+        $data = $request->only(['amount', 'recipient_name', 'recipient_email', 'note', 'expires_at']);
+
+        $validator = Validator::make($data, ['amount' => 'required|numeric']);
+        if ($validator->fails() || (float) $data['amount'] <= 0) {
+            flash('error', 'Enter a valid amount.');
+            back();
+        }
+
+        $balancePaise = (int) round(((float) $data['amount']) * 100);
+
+        $id = GiftCard::create([
+            'code' => GiftCard::generateCode(),
+            'initial_balance_paise' => $balancePaise,
+            'balance_paise' => $balancePaise,
+            'recipient_name' => !empty($data['recipient_name']) ? $data['recipient_name'] : null,
+            'recipient_email' => !empty($data['recipient_email']) ? $data['recipient_email'] : null,
+            'note' => !empty($data['note']) ? $data['note'] : null,
+            'is_active' => 1,
+            'expires_at' => !empty($data['expires_at']) ? $data['expires_at'] : null,
+            'issued_by_user_id' => App::auth()->id(),
+        ]);
+
+        $giftCard = GiftCard::find($id);
+        flash('success', 'Gift card issued: ' . $giftCard['code']);
+        $this->redirect('/admin/marketing/gift-cards');
+    }
+
+    public function toggleGiftCard(Request $request, string $id): void
+    {
+        $card = GiftCard::find((int) $id);
+        if ($card !== null) {
+            GiftCard::updateWhere((int) $id, ['is_active' => $card['is_active'] ? 0 : 1]);
+        }
+        $this->redirect('/admin/marketing/gift-cards');
+    }
+
+    /**
+     * Records a redemption against a phone/in-store order. Gift cards aren't
+     * wired into the online checkout flow yet — this is a manual ledger entry
+     * so staff can track balance use without touching checkout/payment code.
+     */
+    public function redeemGiftCard(Request $request, string $id): void
+    {
+        $card = GiftCard::find((int) $id);
+        if ($card === null) {
+            abort(404);
+        }
+
+        $amount = (float) $request->input('amount', 0);
+        $amountPaise = (int) round($amount * 100);
+
+        if ($amountPaise <= 0 || $amountPaise > (int) $card['balance_paise']) {
+            flash('error', 'Enter an amount that does not exceed the remaining balance.');
+            back();
+        }
+
+        Database::instance()->transaction(function (Database $db) use ($id, $card, $amountPaise, $request) {
+            $db->update('gift_cards', ['balance_paise' => (int) $card['balance_paise'] - $amountPaise], 'id = :id', ['id' => $id]);
+            $db->insert('gift_card_redemptions', [
+                'gift_card_id' => $id,
+                'amount_paise' => $amountPaise,
+                'order_number' => !empty($request->input('order_number')) ? $request->input('order_number') : null,
+                'note' => !empty($request->input('note')) ? $request->input('note') : null,
+                'redeemed_by_user_id' => App::auth()->id(),
+                'created_at' => now(),
+            ]);
+        });
+
+        flash('success', 'Redemption recorded.');
+        $this->redirect('/admin/marketing/gift-cards');
     }
 }

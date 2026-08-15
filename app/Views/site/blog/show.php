@@ -16,6 +16,12 @@
     <?= date('d M Y', strtotime((string) $post['published_at'])) ?><?= $post['author_name'] ? ' · ' . e($post['author_name']) : '' ?>
   </p>
 
+  <?php if (!empty($post['cover_image_path'])): ?>
+    <div class="mt-6 aspect-[16/9] overflow-hidden card-tag">
+      <img src="<?= e(media_url($post['cover_image_path'])) ?>" alt="" class="w-full h-full object-cover">
+    </div>
+  <?php endif; ?>
+
   <div class="mt-8 prose-content text-ink/80 leading-relaxed whitespace-pre-line"><?= nl2br(e($post['body'])) ?></div>
 
   <div class="mt-16 border-t-2 border-ink pt-8">

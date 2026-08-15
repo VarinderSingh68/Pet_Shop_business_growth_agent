@@ -10,15 +10,18 @@ use App\Controllers\Admin\ContentController;
 use App\Controllers\Admin\CustomerController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\DeveloperController;
+use App\Controllers\Admin\EnquiryController;
 use App\Controllers\Admin\InventoryController;
 use App\Controllers\Admin\MarketingController;
 use App\Controllers\Admin\OrderController;
 use App\Controllers\Admin\ProductController;
+use App\Controllers\Admin\PurchaseOrderController;
 use App\Controllers\Admin\ReportController;
 use App\Controllers\Admin\RoleController;
 use App\Controllers\Admin\SecurityController;
 use App\Controllers\Admin\ServiceController;
 use App\Controllers\Admin\SettingsController;
+use App\Controllers\Admin\SupplierController;
 use App\Core\Router;
 
 /** @var Router $router */
@@ -59,9 +62,27 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->post('/catalogue/brands/{id}', [BrandController::class, 'update'], ['csrf']);
     $router->post('/catalogue/brands/{id}/delete', [BrandController::class, 'destroy'], ['csrf']);
 
+    $router->get('/catalogue/reviews', [ProductController::class, 'reviews']);
+    $router->post('/catalogue/reviews/{id}/status', [ProductController::class, 'updateReviewStatus'], ['csrf']);
+    $router->post('/catalogue/reviews/{id}/delete', [ProductController::class, 'destroyReview'], ['csrf']);
+
     $router->get('/inventory', [InventoryController::class, 'index']);
     $router->post('/inventory/{variantId}/adjust', [InventoryController::class, 'adjust'], ['csrf']);
     $router->get('/inventory/{variantId}/ledger', [InventoryController::class, 'ledger']);
+
+    $router->get('/inventory/suppliers', [SupplierController::class, 'index']);
+    $router->post('/inventory/suppliers', [SupplierController::class, 'store'], ['csrf']);
+    $router->post('/inventory/suppliers/{id}', [SupplierController::class, 'update'], ['csrf']);
+    $router->post('/inventory/suppliers/{id}/delete', [SupplierController::class, 'destroy'], ['csrf']);
+
+    $router->get('/inventory/purchase-orders', [PurchaseOrderController::class, 'index']);
+    $router->get('/inventory/purchase-orders/create', [PurchaseOrderController::class, 'create']);
+    $router->post('/inventory/purchase-orders', [PurchaseOrderController::class, 'store'], ['csrf']);
+    $router->get('/inventory/purchase-orders/{id}', [PurchaseOrderController::class, 'show']);
+    $router->post('/inventory/purchase-orders/{id}/status', [PurchaseOrderController::class, 'updateStatus'], ['csrf']);
+    $router->post('/inventory/purchase-orders/{id}/items', [PurchaseOrderController::class, 'storeItem'], ['csrf']);
+    $router->post('/inventory/purchase-orders/{id}/items/{itemId}/delete', [PurchaseOrderController::class, 'destroyItem'], ['csrf']);
+    $router->post('/inventory/purchase-orders/{id}/items/{itemId}/receive', [PurchaseOrderController::class, 'receiveItem'], ['csrf']);
 
     $router->get('/orders', [OrderController::class, 'index']);
     $router->get('/orders/{id}', [OrderController::class, 'show']);
@@ -69,10 +90,17 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->post('/orders/{id}/note', [OrderController::class, 'addNote'], ['csrf']);
     $router->post('/orders/{id}/refund', [OrderController::class, 'refund'], ['csrf']);
     $router->get('/orders/{id}/invoice', [OrderController::class, 'invoice']);
+    $router->post('/orders/{id}/shipment', [OrderController::class, 'saveShipment'], ['csrf']);
 
     $router->get('/customers', [CustomerController::class, 'index']);
     $router->get('/customers/{id}', [CustomerController::class, 'show']);
     $router->post('/customers/{id}/impersonate', [CustomerController::class, 'impersonate'], ['csrf']);
+    $router->post('/customers/{id}/loyalty', [CustomerController::class, 'adjustLoyaltyPoints'], ['csrf']);
+
+    $router->get('/support', [EnquiryController::class, 'index']);
+    $router->get('/support/{id}', [EnquiryController::class, 'show']);
+    $router->post('/support/{id}/reply', [EnquiryController::class, 'reply'], ['csrf']);
+    $router->post('/support/{id}/status', [EnquiryController::class, 'updateStatus'], ['csrf']);
 
     $router->get('/marketing', [MarketingController::class, 'segments']);
     $router->get('/marketing/segments', [MarketingController::class, 'segments']);
@@ -86,6 +114,13 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->get('/marketing/coupons', [MarketingController::class, 'coupons']);
     $router->post('/marketing/coupons', [MarketingController::class, 'storeCoupon'], ['csrf']);
     $router->post('/marketing/coupons/{id}/toggle', [MarketingController::class, 'toggleCoupon'], ['csrf']);
+    $router->get('/marketing/newsletter', [MarketingController::class, 'newsletter']);
+    $router->get('/marketing/newsletter/export', [MarketingController::class, 'exportNewsletter']);
+    $router->get('/marketing/referrals', [MarketingController::class, 'referrals']);
+    $router->get('/marketing/gift-cards', [MarketingController::class, 'giftCards']);
+    $router->post('/marketing/gift-cards', [MarketingController::class, 'storeGiftCard'], ['csrf']);
+    $router->post('/marketing/gift-cards/{id}/toggle', [MarketingController::class, 'toggleGiftCard'], ['csrf']);
+    $router->post('/marketing/gift-cards/{id}/redeem', [MarketingController::class, 'redeemGiftCard'], ['csrf']);
 
     $router->get('/content', function () { redirect('/admin/content/blog'); });
 
@@ -97,6 +132,9 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->post('/content/blog/{id}/delete', [ContentController::class, 'blogDestroy'], ['csrf']);
     $router->get('/content/blog/categories', [ContentController::class, 'blogCategories']);
     $router->post('/content/blog/categories', [ContentController::class, 'storeBlogCategory'], ['csrf']);
+    $router->get('/content/blog/comments', [ContentController::class, 'blogComments']);
+    $router->post('/content/blog/comments/{id}/status', [ContentController::class, 'updateBlogCommentStatus'], ['csrf']);
+    $router->post('/content/blog/comments/{id}/delete', [ContentController::class, 'destroyBlogComment'], ['csrf']);
 
     $router->get('/content/pages', [ContentController::class, 'pages']);
     $router->get('/content/pages/create', [ContentController::class, 'pageCreate']);
@@ -178,6 +216,8 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
 
         $router->get('/mail', [DeveloperController::class, 'mail']);
         $router->get('/mail/{id}/preview', [DeveloperController::class, 'mailPreview']);
+
+        $router->get('/notifications', [DeveloperController::class, 'notifications']);
 
         $router->get('/webhooks', [DeveloperController::class, 'webhooks']);
         $router->post('/webhooks/{id}/replay', [DeveloperController::class, 'replayWebhook'], ['csrf']);

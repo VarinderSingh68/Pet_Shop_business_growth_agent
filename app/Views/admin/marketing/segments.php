@@ -9,6 +9,9 @@
   <a href="/admin/marketing/segments" class="text-sm font-semibold border-b-2 border-ink pb-1">Segments</a>
   <a href="/admin/marketing/campaigns" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Campaigns</a>
   <a href="/admin/marketing/coupons" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Coupons</a>
+  <a href="/admin/marketing/gift-cards" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Gift cards</a>
+  <a href="/admin/marketing/newsletter" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Newsletter</a>
+  <a href="/admin/marketing/referrals" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Referrals</a>
   <a href="/admin/marketing/activity" class="text-sm font-semibold text-ink/50 hover:text-ink pb-1">Growth Agent activity</a>
 </div>
 
