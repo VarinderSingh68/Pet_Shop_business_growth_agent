@@ -25,44 +25,52 @@ $variantsJson = json_encode(array_map(static function (array $v) use ($product) 
 }, $variants), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 $defaultVariant = $variants[0] ?? null;
+
+// Built as a plain string and HTML-attribute-escaped on output (not just
+// PHP-interpolated straight into single quotes) because both halves of this
+// mix quote characters that would otherwise break the attribute: the
+// hand-written JS below is full of 'single-quoted' string literals, and
+// $variantsJson is JSON, which is only ever "double-quoted". Either raw
+// delimiter collides with content on the other side.
+$productXData = '{
+    variants: ' . $variantsJson . ',
+    selected: ' . ($defaultVariant ? (int) $defaultVariant['id'] : 'null') . ',
+    get variant() { return this.variants.find(v => v.id === this.selected) },
+    zoom: false,
+    adding: false,
+    async addToCart() {
+      if (this.adding || !this.variant || this.variant.stock <= 0) return;
+      this.adding = true;
+      try {
+        const res = await fetch(\'/cart/add\', {
+          method: \'POST\',
+          headers: {
+            \'Content-Type\': \'application/x-www-form-urlencoded\',
+            \'Accept\': \'application/json\',
+            \'X-CSRF-Token\': document.querySelector(\'meta[name=csrf-token]\').content,
+          },
+          body: new URLSearchParams({
+            product_id: \'' . (int) $product['id'] . '\',
+            variant_id: String(this.selected),
+            qty: String(this.$refs.qty.value || 1),
+          }),
+        });
+        const data = await res.json();
+        window.dispatchEvent(new CustomEvent(\'petshop-toast\', { detail: { type: res.ok ? \'success\' : \'error\', message: data.message } }));
+        if (res.ok) {
+          window.dispatchEvent(new CustomEvent(\'cart-updated\', { detail: { count: data.cartCount } }));
+        }
+      } catch {
+        window.dispatchEvent(new CustomEvent(\'petshop-toast\', { detail: { type: \'error\', message: \'Something went wrong. Please try again.\' } }));
+      } finally {
+        this.adding = false;
+      }
+    },
+}';
 ?>
 
 <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-10"
-         x-data='{
-            variants: <?= $variantsJson ?>,
-            selected: <?= $defaultVariant ? (int) $defaultVariant['id'] : 'null' ?>,
-            get variant() { return this.variants.find(v => v.id === this.selected) },
-            zoom: false,
-            adding: false,
-            async addToCart() {
-              if (this.adding || !this.variant || this.variant.stock <= 0) return;
-              this.adding = true;
-              try {
-                const res = await fetch('/cart/add', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Accept': 'application/json',
-                    'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content,
-                  },
-                  body: new URLSearchParams({
-                    product_id: '<?= (int) $product['id'] ?>',
-                    variant_id: String(this.selected),
-                    qty: String(this.$refs.qty.value || 1),
-                  }),
-                });
-                const data = await res.json();
-                window.dispatchEvent(new CustomEvent('petshop-toast', { detail: { type: res.ok ? 'success' : 'error', message: data.message } }));
-                if (res.ok) {
-                  window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cartCount } }));
-                }
-              } catch {
-                window.dispatchEvent(new CustomEvent('petshop-toast', { detail: { type: 'error', message: 'Something went wrong. Please try again.' } }));
-              } finally {
-                this.adding = false;
-              }
-            },
-         }'>
+         x-data="<?= e($productXData) ?>">
 
   <nav class="text-sm text-ink/50" aria-label="Breadcrumb">
     <a href="/shop" class="hover:text-leash">Shop</a> <span aria-hidden="true">/</span>
