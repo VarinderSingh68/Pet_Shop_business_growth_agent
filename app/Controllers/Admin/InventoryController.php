@@ -76,7 +76,7 @@ final class InventoryController extends Controller
         $db = Database::instance();
 
         $db->transaction(function (Database $db) use ($variantId, $delta, $reason, $note) {
-            $variant = $db->selectOne('SELECT * FROM product_variants WHERE id = :id FOR UPDATE', ['id' => $variantId]);
+            $variant = $db->selectOne('SELECT * FROM product_variants WHERE id = :id', ['id' => $variantId]);
             if ($variant === null) {
                 throw new \RuntimeException('Variant not found.');
             }

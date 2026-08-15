@@ -51,8 +51,7 @@ final class OrderService
                  FROM cart_items ci
                  JOIN product_variants v ON v.id = ci.variant_id
                  JOIN products p ON p.id = ci.product_id
-                 WHERE ci.cart_id = :cid
-                 FOR UPDATE',
+                 WHERE ci.cart_id = :cid',
                 ['cid' => $cart['id']],
             );
 
@@ -71,7 +70,7 @@ final class OrderService
             $subtotal = $this->cartService->subtotal($items);
 
             $coupon = $cart['coupon_id'] !== null
-                ? $db->selectOne('SELECT * FROM coupons WHERE id = :id FOR UPDATE', ['id' => $cart['coupon_id']])
+                ? $db->selectOne('SELECT * FROM coupons WHERE id = :id', ['id' => $cart['coupon_id']])
                 : null;
             $discount = $this->cartService->discountFor($coupon, $subtotal);
 

@@ -90,7 +90,7 @@ final class AppointmentService
         $db = Database::instance();
 
         return $db->transaction(function (Database $db) use ($slotId, $serviceId, $staffId, $userId, $petId, $guestName, $guestEmail, $guestPhone, $notes, $depositPaise) {
-            $slot = $db->selectOne('SELECT * FROM service_slots WHERE id = :id FOR UPDATE', ['id' => $slotId]);
+            $slot = $db->selectOne('SELECT * FROM service_slots WHERE id = :id', ['id' => $slotId]);
 
             if ($slot === null || (int) $slot['is_booked'] === 1) {
                 throw new \RuntimeException('That time slot was just booked by someone else. Please choose another.');
@@ -169,7 +169,7 @@ final class AppointmentService
                 );
             }
 
-            $newSlot = $db->selectOne('SELECT * FROM service_slots WHERE id = :id FOR UPDATE', ['id' => $newSlotId]);
+            $newSlot = $db->selectOne('SELECT * FROM service_slots WHERE id = :id', ['id' => $newSlotId]);
             if ($newSlot === null || (int) $newSlot['is_booked'] === 1) {
                 throw new \RuntimeException('That time slot is no longer available.');
             }

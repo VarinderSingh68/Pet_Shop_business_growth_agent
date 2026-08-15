@@ -277,7 +277,7 @@ final class ServiceController extends Controller
 
         $db = Database::instance();
         $db->transaction(function (Database $db) use ($appointment, $newSlotId, $id) {
-            $newSlot = $db->selectOne('SELECT * FROM service_slots WHERE id = :id AND is_booked = 0 FOR UPDATE', ['id' => $newSlotId]);
+            $newSlot = $db->selectOne('SELECT * FROM service_slots WHERE id = :id AND is_booked = 0', ['id' => $newSlotId]);
             if ($newSlot === null) {
                 throw new \RuntimeException('That slot is no longer available.');
             }
