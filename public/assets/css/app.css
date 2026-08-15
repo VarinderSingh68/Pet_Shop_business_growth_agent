@@ -576,3 +576,30 @@ body.site-shell > div:not(.site-blob-layer) {
 .admin-table tbody tr:hover {
   background: color-mix(in srgb, var(--tennis) 18%, transparent);
 }
+
+/* Rich-text content: blog/page bodies and product descriptions authored via
+   the admin rich-text editor. Tailwind's Preflight strips default heading/
+   list styling, so this reintroduces just enough hierarchy without pulling
+   in a typography plugin. */
+.prose-content :where(h2, h3) {
+  font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.prose-content h2 { font-size: 1.5rem; margin: 1.5rem 0 0.75rem; }
+.prose-content h3 { font-size: 1.25rem; margin: 1.25rem 0 0.5rem; }
+.prose-content p { margin: 0.75rem 0; }
+.prose-content ul, .prose-content ol { margin: 0.75rem 0; padding-left: 1.5rem; }
+.prose-content ul { list-style: disc; }
+.prose-content ol { list-style: decimal; }
+.prose-content li { margin: 0.25rem 0; }
+.prose-content blockquote {
+  margin: 1rem 0;
+  padding: 0.5rem 0 0.5rem 1rem;
+  border-left: 3px solid var(--leash);
+  color: color-mix(in srgb, var(--ink) 75%, transparent);
+  font-style: italic;
+}
+.prose-content a { color: var(--leash); text-decoration: underline; }
+.prose-content > :first-child { margin-top: 0; }

@@ -4,8 +4,12 @@
 
 /** @var array $referrals */
 /** @var array $stats */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
 
 $statusColors = ['pending' => 'badge-neutral', 'completed' => 'badge-info', 'rewarded' => 'badge-success', 'fraud_flagged' => 'badge-danger'];
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <div class="flex gap-2 mb-4">
@@ -42,5 +46,7 @@ $statusColors = ['pending' => 'badge-neutral', 'completed' => 'badge-info', 'rew
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/marketing/referrals']); ?>
 
 <?php \App\Core\View::stop(); ?>

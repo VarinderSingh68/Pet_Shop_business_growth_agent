@@ -16,12 +16,13 @@ final class PurchaseOrder extends Model
     }
 
     /** @return array<int, array<string, mixed>> */
-    public static function withSupplier(): array
+    public static function withSupplier(int $page = 1, int $perPage = 30): array
     {
         return static::db()->select(
             'SELECT po.*, s.name AS supplier_name
              FROM purchase_orders po JOIN suppliers s ON s.id = po.supplier_id
-             ORDER BY po.created_at DESC',
+             ORDER BY po.created_at DESC
+             LIMIT ' . max(1, $perPage) . ' OFFSET ' . ((max(1, $page) - 1) * max(1, $perPage)),
         );
     }
 

@@ -25,12 +25,16 @@ $totalPages = max(1, (int) ceil($total / $perPage));
   </div>
 </div>
 
-<form method="GET" action="/admin/catalogue" class="flex flex-wrap gap-2 mb-4">
+<form method="GET" action="/admin/catalogue" class="flex flex-wrap gap-2 mb-4" x-data>
   <div class="relative flex-1 min-w-[200px]">
+    <label for="product-search" class="sr-only">Search products</label>
     <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink/40"><?= icon('search', 'h-4 w-4') ?></span>
-    <input type="text" name="q" value="<?= e($search) ?>" placeholder="Search name or SKU" class="input pl-9">
+    <input id="product-search" type="text" name="q" value="<?= e($search) ?>" placeholder="Search name or SKU" class="input pl-9"
+           x-on:input.debounce.500ms="$el.form.requestSubmit()"
+           x-init="if ($el.value) { $el.focus(); $el.setSelectionRange($el.value.length, $el.value.length); }">
   </div>
-  <select name="status" class="input !w-auto">
+  <label for="product-status" class="sr-only">Filter by status</label>
+  <select id="product-status" name="status" class="input !w-auto">
     <option value="">All statuses</option>
     <?php foreach (['draft', 'active', 'archived'] as $s): ?>
       <option value="<?= $s ?>" <?= $status === $s ? 'selected' : '' ?>><?= ucfirst($s) ?></option>

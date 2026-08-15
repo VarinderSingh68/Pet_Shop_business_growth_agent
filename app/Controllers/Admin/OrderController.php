@@ -138,6 +138,26 @@ final class OrderController extends Controller
         $this->redirect('/admin/orders/' . $id);
     }
 
+    public function bulkStatus(Request $request): void
+    {
+        $ids = array_map('intval', (array) $request->input('ids', []));
+        $status = (string) $request->input('bulk_status', '');
+
+        if ($ids === [] || !in_array($status, self::STATUSES, true)) {
+            flash('error', 'Select at least one order and a status.');
+            back();
+        }
+
+        $adminId = App::auth()->id();
+        foreach ($ids as $orderId) {
+            Order::updateWhere($orderId, ['status' => $status]);
+            Order::addStatusHistory($orderId, $status, 'Bulk update', $adminId);
+        }
+
+        flash('success', count($ids) . ' order(s) updated to ' . str_replace('_', ' ', $status) . '.');
+        $this->redirect('/admin/orders');
+    }
+
     public function addNote(Request $request, string $id): void
     {
         $note = (string) $request->input('internal_notes', '');

@@ -75,7 +75,7 @@ $isEdit = $product !== null;
       </div>
       <div>
         <label for="description" class="block text-sm font-semibold mb-1">Full description</label>
-        <textarea id="description" name="description" rows="5" class="input"><?= e($product['description'] ?? '') ?></textarea>
+        <?php \App\Core\View::include('components/rich-text-editor', ['id' => 'description', 'name' => 'description', 'value' => $product['description'] ?? '', 'rows' => 'min-h-[10rem]']); ?>
       </div>
 
       <label class="flex items-center gap-2 text-sm">
@@ -152,10 +152,14 @@ $isEdit = $product !== null;
 
       <div class="card-tag p-5 bg-white">
         <p class="font-display font-semibold">Images</p>
-        <div class="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-3">
-          <?php foreach ($images as $img): ?>
-            <div class="relative border-2 border-ink">
-              <img src="<?= e(media_url($img['path'])) ?>" alt="<?= e($img['alt_text'] ?? '') ?>" loading="lazy" class="w-full aspect-square object-cover">
+        <?php if (count($images) > 1): ?>
+          <p class="text-xs text-ink/50 mt-1">Drag to reorder — the first image is the primary photo shown in the shop and cart.</p>
+        <?php endif; ?>
+        <div id="image-reorder-grid" data-reorder-url="/admin/catalogue/products/<?= (int) $product['id'] ?>/images/reorder" class="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-3">
+          <?php foreach ($images as $i => $img): ?>
+            <div class="relative border-2 border-ink cursor-move" draggable="true" data-image-id="<?= (int) $img['id'] ?>">
+              <?php if ($i === 0): ?><span class="absolute top-1 left-1 badge badge-success !text-[10px] !px-1.5 !py-0.5">Primary</span><?php endif; ?>
+              <img src="<?= e(media_url($img['path'])) ?>" alt="<?= e($img['alt_text'] ?? '') ?>" loading="lazy" class="w-full aspect-square object-cover pointer-events-none">
               <form method="POST" action="/admin/catalogue/products/<?= (int) $product['id'] ?>/images/<?= (int) $img['id'] ?>/delete" class="absolute top-1 right-1">
                 <?= csrf_field() ?>
                 <button type="submit" class="bg-leash text-paper text-xs px-1.5 py-0.5">&times;</button>
@@ -178,5 +182,55 @@ $isEdit = $product !== null;
       </div>
     <?php endif; ?>
   </div>
+
+<script>
+  (function () {
+    const grid = document.getElementById('image-reorder-grid');
+    if (!grid) return;
+
+    let dragged = null;
+
+    grid.querySelectorAll('[data-image-id]').forEach((el) => {
+      el.addEventListener('dragstart', () => { dragged = el; el.classList.add('opacity-40'); });
+      el.addEventListener('dragend', () => { el.classList.remove('opacity-40'); });
+      el.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!dragged || dragged === el) return;
+        const rect = el.getBoundingClientRect();
+        const after = (e.clientX - rect.left) > rect.width / 2;
+        el.parentNode.insertBefore(dragged, after ? el.nextSibling : el);
+      });
+      el.addEventListener('drop', (e) => e.preventDefault());
+    });
+
+    grid.addEventListener('dragend', async () => {
+      const order = Array.from(grid.querySelectorAll('[data-image-id]')).map((el) => parseInt(el.dataset.imageId, 10));
+      // Re-flag the primary badge locally so it doesn't wait on a reload.
+      grid.querySelectorAll('.badge').forEach((b) => b.remove());
+      const first = grid.querySelector('[data-image-id]');
+      if (first) {
+        const badge = document.createElement('span');
+        badge.className = 'absolute top-1 left-1 badge badge-success !text-[10px] !px-1.5 !py-0.5';
+        badge.textContent = 'Primary';
+        first.prepend(badge);
+      }
+
+      try {
+        const res = await fetch(grid.dataset.reorderUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          },
+          body: JSON.stringify({ order }),
+        });
+        if (!res.ok) throw new Error('Save failed');
+        window.dispatchEvent(new CustomEvent('admin-toast', { detail: { type: 'success', message: 'Image order saved.' } }));
+      } catch {
+        window.dispatchEvent(new CustomEvent('admin-toast', { detail: { type: 'error', message: 'Could not save the new image order — please try again.' } }));
+      }
+    });
+  })();
+</script>
 
 <?php \App\Core\View::stop(); ?>

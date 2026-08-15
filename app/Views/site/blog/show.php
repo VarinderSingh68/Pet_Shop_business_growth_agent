@@ -22,7 +22,8 @@
     </div>
   <?php endif; ?>
 
-  <div class="mt-8 prose-content text-ink/80 leading-relaxed whitespace-pre-line"><?= nl2br(e($post['body'])) ?></div>
+  <?php /* Raw output is safe here: body is staff-authored via the admin rich-text editor and passes through HtmlSanitizer::clean() before it's ever saved. */ ?>
+  <div class="mt-8 prose-content text-ink/80 leading-relaxed"><?= $post['body'] ?></div>
 
   <div class="mt-16 border-t-2 border-ink pt-8">
     <h2 class="font-display text-xl font-bold">Comments</h2>

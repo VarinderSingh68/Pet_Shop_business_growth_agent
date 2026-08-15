@@ -5,8 +5,12 @@
 /** @var array $comments */
 /** @var string $status */
 /** @var array $countsByStatus */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
 
 $tabs = ['pending' => 'Pending', 'approved' => 'Approved', 'flagged' => 'Flagged'];
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <div class="flex items-center justify-between mb-4">
@@ -68,5 +72,7 @@ $tabs = ['pending' => 'Pending', 'approved' => 'Approved', 'flagged' => 'Flagged
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/content/blog/comments', 'query' => ['status' => $status]]); ?>
 
 <?php \App\Core\View::stop(); ?>

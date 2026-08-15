@@ -6,6 +6,11 @@
 /** @var int $lowStockCount */
 /** @var bool $lowStockOnly */
 /** @var string $search */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
+
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <div class="flex gap-2 mb-4">
@@ -15,8 +20,11 @@
 </div>
 
 <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
-  <form method="GET" action="/admin/inventory" class="flex flex-wrap gap-2">
-    <input type="text" name="q" value="<?= e($search) ?>" placeholder="Search product or SKU" class="min-w-[220px] input text-sm">
+  <form method="GET" action="/admin/inventory" class="flex flex-wrap gap-2" x-data>
+    <label for="inventory-search" class="sr-only">Search product or SKU</label>
+    <input id="inventory-search" type="text" name="q" value="<?= e($search) ?>" placeholder="Search product or SKU" class="min-w-[220px] input text-sm"
+           x-on:input.debounce.500ms="$el.form.requestSubmit()"
+           x-init="if ($el.value) { $el.focus(); $el.setSelectionRange($el.value.length, $el.value.length); }">
     <label class="flex items-center gap-2 border-2 border-ink px-3 py-1.5 text-sm cursor-pointer">
       <input type="checkbox" name="low_stock" value="1" <?= $lowStockOnly ? 'checked' : '' ?> onchange="this.form.submit()">
       Low stock only (<?= $lowStockCount ?>)
@@ -64,5 +72,7 @@
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/inventory', 'query' => ['q' => $search, 'low_stock' => $lowStockOnly ? 1 : null]]); ?>
 
 <?php \App\Core\View::stop(); ?>

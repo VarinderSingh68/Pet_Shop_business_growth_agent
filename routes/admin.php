@@ -48,6 +48,7 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->post('/catalogue/products/{id}/variants/{variantId}/delete', [ProductController::class, 'destroyVariant'], ['csrf']);
     $router->post('/catalogue/products/{id}/images', [ProductController::class, 'storeImage'], ['csrf']);
     $router->post('/catalogue/products/{id}/images/{imageId}/delete', [ProductController::class, 'destroyImage'], ['csrf']);
+    $router->post('/catalogue/products/{id}/images/reorder', [ProductController::class, 'reorderImages'], ['csrf']);
 
     $router->get('/catalogue/import', [ProductController::class, 'importForm']);
     $router->post('/catalogue/import', [ProductController::class, 'import'], ['csrf']);
@@ -85,6 +86,7 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->post('/inventory/purchase-orders/{id}/items/{itemId}/receive', [PurchaseOrderController::class, 'receiveItem'], ['csrf']);
 
     $router->get('/orders', [OrderController::class, 'index']);
+    $router->post('/orders/bulk', [OrderController::class, 'bulkStatus'], ['csrf']);
     $router->get('/orders/{id}', [OrderController::class, 'show']);
     $router->post('/orders/{id}/status', [OrderController::class, 'updateStatus'], ['csrf']);
     $router->post('/orders/{id}/note', [OrderController::class, 'addNote'], ['csrf']);

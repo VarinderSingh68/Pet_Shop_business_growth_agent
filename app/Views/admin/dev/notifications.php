@@ -3,6 +3,11 @@
 \App\Core\View::start('content');
 
 /** @var array $notifications */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
+
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <a href="/admin/dev" class="text-sm text-ink/50 hover:text-leash">&larr; Developer tools</a>
@@ -27,5 +32,7 @@
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/dev/notifications']); ?>
 
 <?php \App\Core\View::stop(); ?>

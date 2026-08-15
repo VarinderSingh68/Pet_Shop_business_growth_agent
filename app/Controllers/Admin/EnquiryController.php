@@ -12,14 +12,20 @@ use App\Models\Enquiry;
 
 final class EnquiryController extends Controller
 {
+    private const PER_PAGE = 30;
+
     public function index(Request $request): void
     {
         $status = (string) $request->query('status', 'open');
+        $page = max(1, (int) $request->query('page', 1));
         $where = in_array($status, ['open', 'in_progress', 'resolved'], true) ? 'WHERE status = :status' : '';
+        $bindings = $where !== '' ? ['status' => $status] : [];
+
+        $total = (int) (Database::instance()->selectOne("SELECT COUNT(*) c FROM enquiries {$where}", $bindings)['c'] ?? 0);
 
         $enquiries = Database::instance()->select(
-            "SELECT * FROM enquiries {$where} ORDER BY created_at DESC LIMIT 200",
-            $where !== '' ? ['status' => $status] : [],
+            "SELECT * FROM enquiries {$where} ORDER BY created_at DESC LIMIT " . self::PER_PAGE . ' OFFSET ' . (($page - 1) * self::PER_PAGE),
+            $bindings,
         );
 
         $counts = Database::instance()->select('SELECT status, COUNT(*) AS c FROM enquiries GROUP BY status');
@@ -30,6 +36,9 @@ final class EnquiryController extends Controller
             'enquiries' => $enquiries,
             'status' => $status,
             'countsByStatus' => $countsByStatus,
+            'total' => $total,
+            'page' => $page,
+            'perPage' => self::PER_PAGE,
         ]);
     }
 

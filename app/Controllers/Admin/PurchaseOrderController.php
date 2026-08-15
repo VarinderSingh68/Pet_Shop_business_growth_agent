@@ -14,11 +14,19 @@ use App\Models\Supplier;
 
 final class PurchaseOrderController extends Controller
 {
+    private const PER_PAGE = 30;
+
     public function index(Request $request): void
     {
+        $page = max(1, (int) $request->query('page', 1));
+        $total = (int) (Database::instance()->selectOne('SELECT COUNT(*) c FROM purchase_orders')['c'] ?? 0);
+
         $this->view('admin/inventory/purchase-orders/index', [
             'title' => 'Purchase orders',
-            'purchaseOrders' => PurchaseOrder::withSupplier(),
+            'purchaseOrders' => PurchaseOrder::withSupplier($page, self::PER_PAGE),
+            'total' => $total,
+            'page' => $page,
+            'perPage' => self::PER_PAGE,
         ]);
     }
 

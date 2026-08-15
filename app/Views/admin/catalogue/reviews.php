@@ -5,8 +5,12 @@
 /** @var array $reviews */
 /** @var string $status */
 /** @var array $countsByStatus */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
 
 $tabs = ['pending' => 'Pending', 'approved' => 'Approved', 'flagged' => 'Flagged'];
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
@@ -70,5 +74,7 @@ $tabs = ['pending' => 'Pending', 'approved' => 'Approved', 'flagged' => 'Flagged
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/catalogue/reviews', 'query' => ['status' => $status]]); ?>
 
 <?php \App\Core\View::stop(); ?>

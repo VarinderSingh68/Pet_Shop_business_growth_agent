@@ -4,6 +4,11 @@
 
 /** @var array $subscribers */
 /** @var int $subscribedCount */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
+
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
@@ -19,7 +24,7 @@
   <a href="/admin/marketing/newsletter/export" class="btn btn-secondary btn-sm">Export CSV</a>
 </div>
 
-<p class="text-sm text-ink/60 mb-4"><?= $subscribedCount ?> subscribed of <?= count($subscribers) ?> total.</p>
+<p class="text-sm text-ink/60 mb-4"><?= $subscribedCount ?> subscribed of <?= $total ?> total.</p>
 
 <div class="border-2 border-ink bg-white overflow-x-auto">
   <table class="admin-table w-full text-sm">
@@ -36,5 +41,7 @@
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/marketing/newsletter']); ?>
 
 <?php \App\Core\View::stop(); ?>

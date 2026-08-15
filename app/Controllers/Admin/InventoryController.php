@@ -11,11 +11,14 @@ use App\Core\Request;
 
 final class InventoryController extends Controller
 {
+    private const PER_PAGE = 50;
+
     public function index(Request $request): void
     {
         $db = Database::instance();
         $lowStockOnly = (bool) $request->query('low_stock', false);
         $search = trim((string) $request->query('q', ''));
+        $page = max(1, (int) $request->query('page', 1));
 
         $where = ['v.deleted_at IS NULL', 'p.deleted_at IS NULL'];
         $bindings = [];
@@ -28,13 +31,18 @@ final class InventoryController extends Controller
         }
         $whereSql = implode(' AND ', $where);
 
+        $total = (int) ($db->selectOne(
+            "SELECT COUNT(*) c FROM product_variants v JOIN products p ON p.id = v.product_id WHERE {$whereSql}",
+            $bindings,
+        )['c'] ?? 0);
+
         $variants = $db->select(
             "SELECT v.*, p.name AS product_name, p.slug AS product_slug
              FROM product_variants v
              JOIN products p ON p.id = v.product_id
              WHERE {$whereSql}
              ORDER BY (v.stock_quantity <= v.low_stock_threshold) DESC, p.name ASC
-             LIMIT 200",
+             LIMIT " . self::PER_PAGE . ' OFFSET ' . (($page - 1) * self::PER_PAGE),
             $bindings,
         );
 
@@ -49,6 +57,9 @@ final class InventoryController extends Controller
             'lowStockCount' => $lowStockCount,
             'lowStockOnly' => $lowStockOnly,
             'search' => $search,
+            'total' => $total,
+            'page' => $page,
+            'perPage' => self::PER_PAGE,
         ]);
     }
 

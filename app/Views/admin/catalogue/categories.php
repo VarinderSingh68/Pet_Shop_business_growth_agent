@@ -21,9 +21,9 @@
           <tr class="border-b border-mist">
             <form method="POST" action="/admin/catalogue/categories/<?= (int) $c['id'] ?>">
               <?= csrf_field() ?>
-              <td class="p-2"><input type="text" name="name" value="<?= e($c['name']) ?>" class="border border-ink px-1.5 py-1 w-full"></td>
+              <td class="p-2"><input type="text" name="name" value="<?= e($c['name']) ?>" aria-label="Category name" class="border border-ink px-1.5 py-1 w-full"></td>
               <td class="p-2">
-                <select name="parent_id" class="border border-ink px-1.5 py-1">
+                <select name="parent_id" aria-label="Parent category" class="border border-ink px-1.5 py-1">
                   <option value="">None</option>
                   <?php foreach ($categories as $p): ?>
                     <?php if ($p['id'] === $c['id']) continue; ?>
@@ -31,9 +31,9 @@
                   <?php endforeach; ?>
                 </select>
               </td>
-              <td class="p-2"><input type="text" name="meta_title" value="<?= e($c['meta_title'] ?? '') ?>" placeholder="Defaults to name" class="border border-ink px-1.5 py-1 w-44"></td>
-              <td class="p-2"><input type="text" name="meta_description" value="<?= e($c['meta_description'] ?? '') ?>" placeholder="Defaults to description" class="border border-ink px-1.5 py-1 w-56"></td>
-              <td class="p-2"><input type="checkbox" name="is_active" value="1" <?= $c['is_active'] ? 'checked' : '' ?>></td>
+              <td class="p-2"><input type="text" name="meta_title" value="<?= e($c['meta_title'] ?? '') ?>" placeholder="Defaults to name" aria-label="Meta title" class="border border-ink px-1.5 py-1 w-44"></td>
+              <td class="p-2"><input type="text" name="meta_description" value="<?= e($c['meta_description'] ?? '') ?>" placeholder="Defaults to description" aria-label="Meta description" class="border border-ink px-1.5 py-1 w-56"></td>
+              <td class="p-2"><label class="sr-only" for="cat-active-<?= (int) $c['id'] ?>">Active</label><input id="cat-active-<?= (int) $c['id'] ?>" type="checkbox" name="is_active" value="1" <?= $c['is_active'] ? 'checked' : '' ?>></td>
               <td class="p-2 whitespace-nowrap">
                 <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold text-fern hover:underline"><?= icon('check', 'h-3 w-3') ?> Save</button>
                 <button type="submit" formaction="/admin/catalogue/categories/<?= (int) $c['id'] ?>/delete" class="inline-flex items-center gap-1 text-xs font-semibold text-leash hover:underline ml-2"><?= icon('trash', 'h-3 w-3') ?> Delete</button>
@@ -49,8 +49,10 @@
     <p class="font-display font-semibold">Add category</p>
     <form method="POST" action="/admin/catalogue/categories" class="mt-3 space-y-3">
       <?= csrf_field() ?>
-      <input type="text" name="name" placeholder="Name" required class="input text-sm">
-      <select name="parent_id" class="input text-sm">
+      <label for="new-cat-name" class="sr-only">Name</label>
+      <input id="new-cat-name" type="text" name="name" placeholder="Name" required class="input text-sm">
+      <label for="new-cat-parent" class="sr-only">Parent category</label>
+      <select id="new-cat-parent" name="parent_id" class="input text-sm">
         <option value="">No parent (top level)</option>
         <?php foreach ($categories as $c): ?>
           <option value="<?= (int) $c['id'] ?>"><?= e($c['name']) ?></option>

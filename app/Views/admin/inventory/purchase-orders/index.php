@@ -3,8 +3,12 @@
 \App\Core\View::start('content');
 
 /** @var array $purchaseOrders */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
 
 $statusColors = ['draft' => 'badge-neutral', 'ordered' => 'badge-info', 'received' => 'badge-success', 'cancelled' => 'badge-danger'];
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
@@ -33,5 +37,7 @@ $statusColors = ['draft' => 'badge-neutral', 'ordered' => 'badge-info', 'receive
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/inventory/purchase-orders']); ?>
 
 <?php \App\Core\View::stop(); ?>

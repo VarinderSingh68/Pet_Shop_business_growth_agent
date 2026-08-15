@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Controller;
 use App\Core\Database;
+use App\Core\HtmlSanitizer;
 use App\Core\Request;
 use App\Core\Validator;
 use App\Models\Brand;
@@ -17,6 +18,8 @@ use App\Services\MediaService;
 
 final class ProductController extends Controller
 {
+    private const REVIEWS_PER_PAGE = 30;
+
     public function __construct(private readonly MediaService $media = new MediaService())
     {
     }
@@ -398,12 +401,45 @@ final class ProductController extends Controller
         $this->redirect('/admin/catalogue/products/' . $productId . '/edit');
     }
 
+    /** Drag-to-reorder: the first image in the posted order becomes the primary/gallery-cover image. */
+    public function reorderImages(Request $request, string $productId): void
+    {
+        $order = array_map('intval', (array) $request->input('order', []));
+        if ($order === []) {
+            $this->json(['message' => 'No order given.'], 422);
+        }
+
+        $db = Database::instance();
+        $ownedIds = array_map('intval', array_column(
+            $db->select('SELECT id FROM product_images WHERE product_id = :pid', ['pid' => $productId]),
+            'id',
+        ));
+
+        // Only ever touch images that actually belong to this product —
+        // an id for someone else's product slipping in here should be a
+        // silent no-op, not a cross-product reorder.
+        foreach ($order as $position => $imageId) {
+            if (in_array($imageId, $ownedIds, true)) {
+                $db->update('product_images', ['sort_order' => $position], 'id = :id', ['id' => $imageId]);
+            }
+        }
+
+        $this->json(['message' => 'Order saved.']);
+    }
+
     // --- Reviews ------------------------------------------------------------
 
     public function reviews(Request $request): void
     {
         $status = (string) $request->query('status', 'pending');
+        $page = max(1, (int) $request->query('page', 1));
         $where = in_array($status, ['pending', 'approved', 'flagged'], true) ? 'WHERE r.status = :status' : '';
+        $bindings = $where !== '' ? ['status' => $status] : [];
+
+        $total = (int) (Database::instance()->selectOne(
+            "SELECT COUNT(*) c FROM reviews r {$where}",
+            $bindings,
+        )['c'] ?? 0);
 
         $reviews = Database::instance()->select(
             "SELECT r.*, p.name AS product_name, p.slug AS product_slug, u.name AS reviewer_name
@@ -411,8 +447,8 @@ final class ProductController extends Controller
              JOIN products p ON p.id = r.product_id
              LEFT JOIN users u ON u.id = r.user_id
              {$where}
-             ORDER BY r.created_at DESC LIMIT 200",
-            $where !== '' ? ['status' => $status] : [],
+             ORDER BY r.created_at DESC LIMIT " . self::REVIEWS_PER_PAGE . ' OFFSET ' . (($page - 1) * self::REVIEWS_PER_PAGE),
+            $bindings,
         );
 
         $counts = Database::instance()->select('SELECT status, COUNT(*) AS c FROM reviews GROUP BY status');
@@ -422,6 +458,9 @@ final class ProductController extends Controller
             'reviews' => $reviews,
             'status' => $status,
             'countsByStatus' => array_column($counts, 'c', 'status'),
+            'total' => $total,
+            'page' => $page,
+            'perPage' => self::REVIEWS_PER_PAGE,
         ]);
     }
 
@@ -483,7 +522,7 @@ final class ProductController extends Controller
             'category_id' => (int) $data['category_id'],
             'brand_id' => !empty($data['brand_id']) ? (int) $data['brand_id'] : null,
             'short_description' => !empty($data['short_description']) ? $data['short_description'] : null,
-            'description' => !empty($data['description']) ? $data['description'] : null,
+            'description' => !empty($data['description']) ? HtmlSanitizer::clean($data['description']) : null,
             'pet_type' => $data['pet_type'],
             'life_stage' => $data['life_stage'],
             'status' => in_array($data['status'] ?? '', ['draft', 'active', 'archived'], true) ? $data['status'] : 'draft',

@@ -199,7 +199,8 @@ $defaultVariant = $variants[0] ?? null;
       <?php if ($product['description']): ?>
         <div class="mt-10 border-t border-white/50 pt-6">
           <h2 class="font-display text-lg font-semibold">About this product</h2>
-          <p class="mt-3 text-ink/75 whitespace-pre-line"><?= e($product['description']) ?></p>
+          <?php /* Raw output is safe here: description is staff-authored via the admin rich-text editor and passes through HtmlSanitizer::clean() before it's ever saved. */ ?>
+          <div class="mt-3 prose-content text-ink/75"><?= $product['description'] ?></div>
         </div>
       <?php endif; ?>
     </div>

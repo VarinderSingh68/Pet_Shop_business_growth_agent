@@ -5,8 +5,12 @@
 /** @var array $enquiries */
 /** @var string $status */
 /** @var array $countsByStatus */
+/** @var int $total */
+/** @var int $page */
+/** @var int $perPage */
 
 $tabs = ['open' => 'Open', 'in_progress' => 'In progress', 'resolved' => 'Resolved'];
+$totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
 <div class="flex gap-2 mb-4">
@@ -42,5 +46,7 @@ $tabs = ['open' => 'Open', 'in_progress' => 'In progress', 'resolved' => 'Resolv
     </tbody>
   </table>
 </div>
+
+<?php \App\Core\View::include('components/admin-pagination', ['page' => $page, 'totalPages' => $totalPages, 'basePath' => '/admin/support', 'query' => ['status' => $status]]); ?>
 
 <?php \App\Core\View::stop(); ?>

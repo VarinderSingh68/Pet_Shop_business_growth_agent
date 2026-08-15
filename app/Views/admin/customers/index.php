@@ -11,10 +11,13 @@
 $totalPages = max(1, (int) ceil($total / $perPage));
 ?>
 
-<form method="GET" action="/admin/customers" class="flex flex-wrap gap-2 mb-4">
+<form method="GET" action="/admin/customers" class="flex flex-wrap gap-2 mb-4" x-data>
   <div class="relative">
+    <label for="customer-search" class="sr-only">Search customers</label>
     <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink/40"><?= icon('search', 'h-4 w-4') ?></span>
-    <input type="text" name="q" value="<?= e($search) ?>" placeholder="Search name, email, or phone" class="input pl-9 !w-auto min-w-[240px]">
+    <input id="customer-search" type="text" name="q" value="<?= e($search) ?>" placeholder="Search name, email, or phone" class="input pl-9 !w-auto min-w-[240px]"
+           x-on:input.debounce.500ms="$el.form.requestSubmit()"
+           x-init="if ($el.value) { $el.focus(); $el.setSelectionRange($el.value.length, $el.value.length); }">
   </div>
   <button type="submit" class="btn btn-secondary"><?= icon('search', 'h-4 w-4') ?> Search</button>
 </form>

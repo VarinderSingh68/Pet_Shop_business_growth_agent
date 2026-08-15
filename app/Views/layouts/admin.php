@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= isset($title) ? e($title) . ' — ' : '' ?>Admin — <?= e(config('app.name')) ?></title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -91,21 +92,74 @@
       </div>
     </header>
 
-    <?php foreach (['success', 'error'] as $flashType): ?>
-      <?php foreach (\App\Core\Session::getFlash($flashType) as $message): ?>
-        <div class="px-4 sm:px-6 pt-4" role="status">
-          <div class="border-2 <?= $flashType === 'success' ? 'border-fern bg-fern/10' : 'border-leash bg-leash/10' ?> px-4 py-3 text-sm font-medium">
-            <?= e($message) ?>
-          </div>
+    <?php
+      $adminFlashes = [];
+      foreach (['success', 'error'] as $flashType) {
+        foreach (\App\Core\Session::getFlash($flashType) as $message) {
+          $adminFlashes[] = ['type' => $flashType, 'message' => $message];
+        }
+      }
+    ?>
+    <div x-data="{ toasts: [] }"
+         x-init="
+           (<?= e(json_encode($adminFlashes)) ?>).forEach((f) => {
+             const id = Date.now() + Math.random();
+             toasts.push({ id, ...f });
+             setTimeout(() => { toasts = toasts.filter((t) => t.id !== id); }, 5000);
+           });
+           window.addEventListener('admin-toast', (e) => {
+             const id = Date.now() + Math.random();
+             toasts.push({ id, type: e.detail.type ?? 'success', message: e.detail.message });
+             setTimeout(() => { toasts = toasts.filter((t) => t.id !== id); }, 5000);
+           });
+         "
+         class="fixed top-4 inset-x-3 sm:inset-x-auto sm:right-4 z-[60] flex flex-col items-center sm:items-end gap-2 pointer-events-none"
+         aria-live="polite">
+      <template x-for="t in toasts" :key="t.id">
+        <div class="pointer-events-auto border-2 px-4 py-3 text-sm font-medium flex items-center gap-2.5 max-w-sm bg-paper"
+             :class="t.type === 'error' ? 'border-leash text-leash' : 'border-fern text-fern'"
+             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+          <svg x-show="t.type !== 'error'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+          <svg x-show="t.type === 'error'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0"><path d="M12 2L1 21h22L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17.3" r="0.9" fill="currentColor" stroke="none"/></svg>
+          <span x-text="t.message" class="text-ink"></span>
+          <button type="button" @click="toasts = toasts.filter((x) => x.id !== t.id)" aria-label="Dismiss" class="ml-auto shrink-0 text-ink/40 hover:text-ink">&times;</button>
         </div>
-      <?php endforeach; ?>
-    <?php endforeach; ?>
+      </template>
+    </div>
 
     <main class="flex-1 p-4 sm:p-6">
       <?= \App\Core\View::section('content') ?>
     </main>
   </div>
 </div>
+
+<script>
+  // Guards every POST form against double-submission (refunds, stock
+  // adjustments, deletes) — disables the button that triggered submit so a
+  // slow request or an impatient double-click can't fire it twice. GET
+  // forms (filters/search) are left alone since re-submitting those is
+  // harmless and some rely on repeat auto-submits (onchange="this.form.submit()").
+  document.addEventListener('submit', (e) => {
+    const form = e.target;
+    // e.defaultPrevented catches forms cancelled by onsubmit="return confirm(...)" —
+    // without this check, clicking Cancel on a delete confirmation would still
+    // leave the button permanently disabled even though nothing was submitted.
+    if (!(form instanceof HTMLFormElement) || form.method.toUpperCase() !== 'POST' || e.defaultPrevented) {
+      return;
+    }
+    form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach((btn) => {
+      if (btn.disabled) {
+        e.preventDefault();
+        return;
+      }
+      requestAnimationFrame(() => {
+        btn.disabled = true;
+        btn.classList.add('opacity-60', 'cursor-wait');
+      });
+    });
+  });
+</script>
 
 </body>
 </html>

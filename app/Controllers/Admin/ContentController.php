@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\App;
 use App\Core\Controller;
 use App\Core\Database;
+use App\Core\HtmlSanitizer;
 use App\Core\Request;
 use App\Core\Validator;
 use App\Models\BlogCategory;
@@ -18,6 +19,8 @@ use App\Services\MediaService;
 
 final class ContentController extends Controller
 {
+    private const COMMENTS_PER_PAGE = 30;
+
     public function __construct(private readonly MediaService $media = new MediaService())
     {
     }
@@ -118,7 +121,7 @@ final class ContentController extends Controller
             'title' => $data['title'],
             'blog_category_id' => !empty($data['blog_category_id']) ? (int) $data['blog_category_id'] : null,
             'excerpt' => !empty($data['excerpt']) ? $data['excerpt'] : null,
-            'body' => $data['body'],
+            'body' => HtmlSanitizer::clean($data['body']),
             'status' => $data['status'] === 'published' ? 'published' : 'draft',
             'published_at' => $data['status'] === 'published' ? now() : null,
         ];
@@ -147,14 +150,21 @@ final class ContentController extends Controller
     public function blogComments(Request $request): void
     {
         $status = (string) $request->query('status', 'pending');
+        $page = max(1, (int) $request->query('page', 1));
         $where = in_array($status, ['pending', 'approved', 'flagged'], true) ? 'WHERE c.status = :status' : '';
+        $bindings = $where !== '' ? ['status' => $status] : [];
+
+        $total = (int) (Database::instance()->selectOne(
+            "SELECT COUNT(*) c FROM blog_comments c {$where}",
+            $bindings,
+        )['c'] ?? 0);
 
         $comments = Database::instance()->select(
             "SELECT c.*, p.title AS post_title, p.slug AS post_slug
              FROM blog_comments c JOIN blog_posts p ON p.id = c.blog_post_id
              {$where}
-             ORDER BY c.created_at DESC LIMIT 200",
-            $where !== '' ? ['status' => $status] : [],
+             ORDER BY c.created_at DESC LIMIT " . self::COMMENTS_PER_PAGE . ' OFFSET ' . (($page - 1) * self::COMMENTS_PER_PAGE),
+            $bindings,
         );
 
         $counts = Database::instance()->select('SELECT status, COUNT(*) AS c FROM blog_comments GROUP BY status');
@@ -164,6 +174,9 @@ final class ContentController extends Controller
             'comments' => $comments,
             'status' => $status,
             'countsByStatus' => array_column($counts, 'c', 'status'),
+            'total' => $total,
+            'page' => $page,
+            'perPage' => self::COMMENTS_PER_PAGE,
         ]);
     }
 
@@ -241,7 +254,7 @@ final class ContentController extends Controller
 
         return [
             'title' => $data['title'],
-            'body' => $data['body'],
+            'body' => HtmlSanitizer::clean($data['body']),
             'meta_title' => !empty($data['meta_title']) ? $data['meta_title'] : null,
             'meta_description' => !empty($data['meta_description']) ? $data['meta_description'] : null,
             'is_published' => !empty($data['is_published']) ? 1 : 0,

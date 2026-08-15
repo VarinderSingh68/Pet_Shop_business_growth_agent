@@ -38,7 +38,7 @@ $isEdit = $post !== null;
   </div>
   <div>
     <label for="body" class="block text-sm font-semibold mb-1">Body</label>
-    <textarea id="body" name="body" rows="12" required class="input"><?= e($post['body'] ?? '') ?></textarea>
+    <?php \App\Core\View::include('components/rich-text-editor', ['id' => 'body', 'name' => 'body', 'value' => $post['body'] ?? '']); ?>
   </div>
   <div>
     <label for="status" class="block text-sm font-semibold mb-1">Status</label>

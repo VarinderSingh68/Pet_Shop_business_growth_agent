@@ -20,6 +20,8 @@ use App\Services\Growth\CopilotService;
 
 final class MarketingController extends Controller
 {
+    private const LIST_PER_PAGE = 40;
+
     public function __construct(
         private readonly CampaignService $campaignService = new CampaignService(),
         private readonly CopilotService $copilot = new CopilotService(),
@@ -185,12 +187,21 @@ final class MarketingController extends Controller
 
     public function newsletter(Request $request): void
     {
-        $subscribers = NewsletterSubscriber::all('created_at DESC');
+        $page = max(1, (int) $request->query('page', 1));
+        $total = NewsletterSubscriber::count();
+        $subscribedCount = NewsletterSubscriber::count(['status' => 'subscribed']);
+
+        $subscribers = Database::instance()->select(
+            'SELECT * FROM newsletter_subscribers ORDER BY created_at DESC LIMIT ' . self::LIST_PER_PAGE . ' OFFSET ' . (($page - 1) * self::LIST_PER_PAGE),
+        );
 
         $this->view('admin/marketing/newsletter', [
             'title' => 'Newsletter subscribers',
             'subscribers' => $subscribers,
-            'subscribedCount' => count(array_filter($subscribers, static fn (array $s) => $s['status'] === 'subscribed')),
+            'subscribedCount' => $subscribedCount,
+            'total' => $total,
+            'page' => $page,
+            'perPage' => self::LIST_PER_PAGE,
         ]);
     }
 
@@ -213,13 +224,7 @@ final class MarketingController extends Controller
 
     public function referrals(Request $request): void
     {
-        $referrals = Database::instance()->select(
-            'SELECT rf.*, ru.name AS referrer_name, ru.email AS referrer_email, rd.name AS referred_name
-             FROM referrals rf
-             JOIN users ru ON ru.id = rf.referrer_user_id
-             JOIN users rd ON rd.id = rf.referred_user_id
-             ORDER BY rf.created_at DESC LIMIT 200',
-        );
+        $page = max(1, (int) $request->query('page', 1));
 
         $stats = Database::instance()->selectOne(
             "SELECT COUNT(*) AS total,
@@ -228,10 +233,21 @@ final class MarketingController extends Controller
              FROM referrals",
         );
 
+        $referrals = Database::instance()->select(
+            'SELECT rf.*, ru.name AS referrer_name, ru.email AS referrer_email, rd.name AS referred_name
+             FROM referrals rf
+             JOIN users ru ON ru.id = rf.referrer_user_id
+             JOIN users rd ON rd.id = rf.referred_user_id
+             ORDER BY rf.created_at DESC LIMIT ' . self::LIST_PER_PAGE . ' OFFSET ' . (($page - 1) * self::LIST_PER_PAGE),
+        );
+
         $this->view('admin/marketing/referrals', [
             'title' => 'Referrals',
             'referrals' => $referrals,
             'stats' => $stats,
+            'total' => (int) ($stats['total'] ?? 0),
+            'page' => $page,
+            'perPage' => self::LIST_PER_PAGE,
         ]);
     }
 

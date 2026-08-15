@@ -19,7 +19,7 @@ $isEdit = $page !== null;
   <div>
     <label for="body" class="block text-sm font-semibold mb-1">Body</label>
     <p class="text-xs text-ink/50 mb-1">Use <code>{{store_name}}</code>, <code>{{store_address}}</code>, <code>{{store_email}}</code>, <code>{{store_phone}}</code> — filled in from Settings.</p>
-    <textarea id="body" name="body" rows="14" required class="input"><?= e($page['body'] ?? '') ?></textarea>
+    <?php \App\Core\View::include('components/rich-text-editor', ['id' => 'body', 'name' => 'body', 'value' => $page['body'] ?? '', 'rows' => 'min-h-[20rem]']); ?>
   </div>
   <label class="flex items-center gap-2 text-sm">
     <input type="checkbox" name="is_published" value="1" <?= ($page['is_published'] ?? 1) ? 'checked' : '' ?> class="border-2 border-ink">
