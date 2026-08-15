@@ -103,7 +103,8 @@ final class CatalogueService
         $sql = "SELECT p.*, b.name AS brand_name, b.slug AS brand_slug,
                        MIN(v.price_paise) AS min_price_paise,
                        MAX(v.compare_at_price_paise) AS compare_at_price_paise,
-                       COALESCE(SUM(v.stock_quantity), 0) AS total_stock
+                       COALESCE(SUM(v.stock_quantity), 0) AS total_stock,
+                       (SELECT pi.path FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1) AS image_path
                 FROM products p
                 LEFT JOIN brands b ON b.id = p.brand_id
                 JOIN product_variants v ON v.product_id = p.id AND v.deleted_at IS NULL

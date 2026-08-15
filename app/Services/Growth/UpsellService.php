@@ -25,6 +25,7 @@ final class UpsellService
             return $db->select(
                 "SELECT p.id, p.name, p.slug, p.pet_type,
                         (SELECT MIN(price_paise) FROM product_variants v WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS min_price_paise,
+                        (SELECT pi.path FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1) AS image_path,
                         COUNT(*) AS co_purchase_count
                  FROM order_items oi1
                  JOIN order_items oi2 ON oi2.order_id = oi1.order_id AND oi2.product_id != oi1.product_id
@@ -52,6 +53,7 @@ final class UpsellService
         return $db->select(
             "SELECT p.id, p.name, p.slug, p.pet_type,
                     (SELECT MIN(price_paise) FROM product_variants v WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS min_price_paise,
+                    (SELECT pi.path FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1) AS image_path,
                     COUNT(*) AS co_purchase_count
              FROM order_items oi1
              JOIN order_items oi2 ON oi2.order_id = oi1.order_id

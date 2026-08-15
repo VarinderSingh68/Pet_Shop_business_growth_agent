@@ -5,6 +5,12 @@
  */
 $class ??= 'aspect-square';
 
+if (!empty($product['image_path'])): ?>
+<div class="<?= e($class) ?> relative overflow-hidden">
+  <img src="<?= e(media_url($product['image_path'])) ?>" alt="<?= e($product['name'] ?? $product['image_alt'] ?? '') ?>" loading="lazy" class="w-full h-full object-cover">
+</div>
+<?php else:
+
 $palette = [
     'dog' => ['grad' => 'linear-gradient(135deg, #fbcfe8, #fde68a)', 'text' => 'text-ink/70'],
     'cat' => ['grad' => 'linear-gradient(135deg, #ddd6fe, #fbcfe8)', 'text' => 'text-ink/70'],
@@ -29,3 +35,4 @@ $icon = $icons[$product['pet_type']] ?? $icons['other'];
   <svg viewBox="0 0 24 24" fill="currentColor" class="w-1/3 h-1/3 opacity-60" aria-hidden="true"><path d="<?= $icon ?>"/></svg>
   <span class="absolute bottom-2 right-2 text-[10px] font-semibold uppercase tracking-wide opacity-50"><?= e($product['pet_type']) ?></span>
 </div>
+<?php endif; ?>

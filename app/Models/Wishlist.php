@@ -17,7 +17,8 @@ final class Wishlist extends Model
         return static::db()->select(
             'SELECT w.*, p.name, p.slug, p.pet_type, p.avg_rating, p.review_count,
                     (SELECT MIN(price_paise) FROM product_variants v WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS min_price_paise,
-                    (SELECT SUM(stock_quantity) FROM product_variants v WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS total_stock
+                    (SELECT SUM(stock_quantity) FROM product_variants v WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS total_stock,
+                    (SELECT pi.path FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1) AS image_path
              FROM wishlists w
              JOIN products p ON p.id = w.product_id
              WHERE w.user_id = :uid

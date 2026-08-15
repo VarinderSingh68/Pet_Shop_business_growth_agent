@@ -38,6 +38,9 @@ require __DIR__ . '/seeds/008_demo_customers_and_orders.php';
 echo "Seeding: reviews and appointments\n";
 require __DIR__ . '/seeds/009_reviews_and_appointments.php';
 
+echo "Seeding: product images\n";
+require __DIR__ . '/seeds/010_product_images.php';
+
 if ($isEntry) {
     echo "\nDone.\n";
 }

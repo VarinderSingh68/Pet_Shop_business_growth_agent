@@ -56,7 +56,8 @@ final class Product extends Model
     public static function relatedTo(array $product, int $limit = 4): array
     {
         return static::db()->select(
-            'SELECT p.*, (SELECT MIN(price_paise) FROM product_variants v WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS min_price_paise
+            'SELECT p.*, (SELECT MIN(price_paise) FROM product_variants v WHERE v.product_id = p.id AND v.deleted_at IS NULL) AS min_price_paise,
+                    (SELECT pi.path FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1) AS image_path
              FROM products p
              WHERE p.category_id = :cat AND p.id != :id AND p.status = "active" AND p.deleted_at IS NULL
              ORDER BY p.avg_rating DESC, p.review_count DESC

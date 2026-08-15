@@ -23,7 +23,7 @@
         <?php foreach ($items as $item): ?>
           <div class="card-tag flex gap-4 p-4">
             <div class="w-24 shrink-0">
-              <?php \App\Core\View::include('components/product-image', ['product' => ['pet_type' => $item['pet_type']], 'class' => 'aspect-square']); ?>
+              <?php \App\Core\View::include('components/product-image', ['product' => ['pet_type' => $item['pet_type'], 'image_path' => $item['image_path'] ?? null, 'name' => $item['product_name']], 'class' => 'aspect-square']); ?>
             </div>
             <div class="flex-1">
               <a href="/shop/<?= e($item['product_slug']) ?>" class="font-semibold hover:text-leash"><?= e($item['product_name']) ?></a>

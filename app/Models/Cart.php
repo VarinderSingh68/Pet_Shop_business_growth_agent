@@ -15,7 +15,8 @@ final class Cart extends Model
     {
         return static::db()->select(
             'SELECT ci.*, p.name AS product_name, p.slug AS product_slug, p.pet_type,
-                    v.label AS variant_label, v.price_paise, v.compare_at_price_paise, v.stock_quantity, v.weight_grams
+                    v.label AS variant_label, v.price_paise, v.compare_at_price_paise, v.stock_quantity, v.weight_grams,
+                    (SELECT pi.path FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1) AS image_path
              FROM cart_items ci
              JOIN products p ON p.id = ci.product_id
              JOIN product_variants v ON v.id = ci.variant_id
