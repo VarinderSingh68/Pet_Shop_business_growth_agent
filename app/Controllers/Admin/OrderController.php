@@ -8,7 +8,9 @@ use App\Core\App;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Core\Request;
+use App\Models\DeliveryAssignment;
 use App\Models\Order;
+use App\Services\DeliveryService;
 
 final class OrderController extends Controller
 {
@@ -77,6 +79,9 @@ final class OrderController extends Controller
             'refunds' => $refunds,
             'shipment' => $shipment,
             'statuses' => self::STATUSES,
+            'riders' => DeliveryService::availablePartners(),
+            'assignment' => DeliveryAssignment::currentForOrder((int) $id),
+            'deliveryStatuses' => DeliveryAssignment::STATUSES,
         ]);
     }
 
@@ -215,5 +220,27 @@ final class OrderController extends Controller
         header('Content-Disposition: inline; filename="invoice-' . $order['order_number'] . '.pdf"');
         echo $pdf;
         exit;
+    }
+
+    /** Assigns (or reassigns) this order to a rider — powers the delivery Android app. */
+    public function assignDelivery(Request $request, string $id): void
+    {
+        $order = Order::find((int) $id);
+        if ($order === null) {
+            abort(404);
+        }
+
+        $partnerId = (int) $request->input('delivery_partner_id', 0);
+        $notes = (string) $request->input('delivery_notes', '');
+
+        if ($partnerId <= 0) {
+            flash('error', 'Choose a delivery partner to assign.');
+            $this->redirect('/admin/orders/' . $id);
+        }
+
+        DeliveryService::assign((int) $id, $partnerId, App::auth()->id(), $notes !== '' ? $notes : null);
+
+        flash('success', 'Order assigned to delivery partner.');
+        $this->redirect('/admin/orders/' . $id);
     }
 }

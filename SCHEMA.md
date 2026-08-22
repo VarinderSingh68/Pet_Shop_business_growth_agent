@@ -143,6 +143,9 @@ erDiagram
 ### Content & settings
 `pages`, `blog_categories`, `blog_posts`, `blog_comments`, `faqs`, `testimonials`, `banners`, `newsletter_subscribers`, `settings`, `mail_logs`
 
+### Delivery (rider app)
+`delivery_assignments` (which rider has which order, and its assigned/picked_up/out_for_delivery/delivered/failed state), `delivery_locations` (rider location pings, optionally tagged to an order) — see [DELIVERY_APP.md](DELIVERY_APP.md)
+
 ### Developer tools
 `slow_queries`, `webhook_deliveries`, `feature_flags`, `migrations` (tracks which migration files have run)
 

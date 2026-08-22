@@ -12,6 +12,16 @@ final class Request
     private array $server;
     private array $jsonBody = [];
 
+    /**
+     * Free-form values middleware can stash for a downstream controller to
+     * read — e.g. DeliveryTokenMiddleware resolves a bearer token to a
+     * user id once and hands it off this way instead of every controller
+     * re-querying api_tokens.
+     *
+     * @var array<string, mixed>
+     */
+    private array $attributes = [];
+
     public function __construct()
     {
         $this->query = $_GET;
@@ -136,5 +146,15 @@ final class Request
     public function server(string $key, mixed $default = null): mixed
     {
         return $this->server[$key] ?? $default;
+    }
+
+    public function setAttribute(string $key, mixed $value): void
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    public function getAttribute(string $key, mixed $default = null): mixed
+    {
+        return $this->attributes[$key] ?? $default;
     }
 }

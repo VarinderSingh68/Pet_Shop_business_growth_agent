@@ -10,6 +10,9 @@
 /** @var array $refunds */
 /** @var array|null $shipment */
 /** @var array $statuses */
+/** @var array $riders */
+/** @var array|null $assignment */
+/** @var array $deliveryStatuses */
 ?>
 
 <a href="/admin/orders" class="text-sm text-ink/50 hover:text-leash">&larr; Orders</a>
@@ -143,6 +146,39 @@
       </form>
       <?php if ($shipment !== null && $shipment['shipped_at']): ?><p class="text-xs text-ink/50 mt-2">Shipped <?= e($shipment['shipped_at']) ?></p><?php endif; ?>
       <?php if ($shipment !== null && $shipment['delivered_at']): ?><p class="text-xs text-ink/50">Delivered <?= e($shipment['delivered_at']) ?></p><?php endif; ?>
+    </div>
+
+    <div class="card-tag p-5 bg-white">
+      <p class="font-display font-semibold">Delivery partner</p>
+      <?php if ($assignment !== null): ?>
+        <?php $currentRider = array_values(array_filter($riders, static fn (array $r) => (int) $r['id'] === (int) $assignment['delivery_partner_id']))[0] ?? null; ?>
+        <p class="text-sm mt-2">
+          <span class="font-semibold"><?= e($currentRider['name'] ?? ('#' . $assignment['delivery_partner_id'])) ?></span>
+          &middot; <span class="capitalize"><?= e(str_replace('_', ' ', $assignment['status'])) ?></span>
+        </p>
+        <p class="text-xs text-ink/50">Assigned <?= e($assignment['assigned_at']) ?></p>
+        <?php if ($assignment['notes']): ?><p class="text-xs text-ink/50 mt-1">Note: <?= e($assignment['notes']) ?></p><?php endif; ?>
+      <?php else: ?>
+        <p class="text-sm text-ink/50 mt-2">Not yet assigned.</p>
+      <?php endif; ?>
+
+      <?php if ($riders === []): ?>
+        <p class="text-xs text-ink/50 mt-3">No delivery partners yet — add one via Admin &rarr; Users with the "Delivery Partner" role.</p>
+      <?php else: ?>
+        <form method="POST" action="/admin/orders/<?= (int) $order['id'] ?>/assign-delivery" class="mt-3 space-y-2">
+          <?= csrf_field() ?>
+          <div>
+            <label for="delivery_partner_id" class="block text-xs font-semibold mb-1">Assign to</label>
+            <select id="delivery_partner_id" name="delivery_partner_id" class="input text-sm w-full">
+              <?php foreach ($riders as $rider): ?>
+                <option value="<?= (int) $rider['id'] ?>" <?= ($assignment['delivery_partner_id'] ?? null) == $rider['id'] ? 'selected' : '' ?>><?= e($rider['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <input type="text" name="delivery_notes" placeholder="Note for the rider (optional)" class="input text-sm w-full">
+          <button type="submit" class="w-full btn btn-secondary btn-sm"><?= $assignment !== null ? 'Reassign' : 'Assign' ?></button>
+        </form>
+      <?php endif; ?>
     </div>
 
     <div class="card-tag p-5 bg-white">

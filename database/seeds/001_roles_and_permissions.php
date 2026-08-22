@@ -12,6 +12,7 @@ $roles = [
     ['slug' => 'staff', 'name' => 'Staff', 'description' => 'Front-desk and fulfilment access: orders, appointments, inventory.'],
     ['slug' => 'developer', 'name' => 'Developer', 'description' => 'Everything Owner has, plus the developer tools panel.'],
     ['slug' => 'customer', 'name' => 'Customer', 'description' => 'Shopper account on the storefront.'],
+    ['slug' => 'delivery', 'name' => 'Delivery Partner', 'description' => 'Rider account for the delivery Android app: assigned orders, status updates, live location. No admin panel access.'],
 ];
 
 $roleIds = [];
@@ -40,6 +41,7 @@ $permissionGroups = [
     'reports' => ['reports.view', 'reports.export'],
     'settings' => ['settings.manage', 'users.manage'],
     'developer' => ['developer.access'],
+    'delivery' => ['deliveries.manage'],
 ];
 
 $permissionIds = [];
@@ -64,8 +66,9 @@ $grants = [
     'owner' => array_keys($permissionIds),
     'developer' => array_keys($permissionIds),
     'manager' => array_diff(array_keys($permissionIds), ['users.manage', 'developer.access']),
-    'staff' => ['orders.view', 'orders.manage', 'customers.view', 'services.view', 'appointments.manage', 'inventory.manage'],
+    'staff' => ['orders.view', 'orders.manage', 'customers.view', 'services.view', 'appointments.manage', 'inventory.manage', 'deliveries.manage'],
     'customer' => [],
+    'delivery' => [],
 ];
 
 foreach ($grants as $roleSlug => $permSlugs) {

@@ -145,6 +145,7 @@ final class Router
             'maintenance' => \App\Middleware\MaintenanceMiddleware::class,
             'guest' => \App\Middleware\GuestMiddleware::class,
             'api_token' => \App\Middleware\ApiTokenMiddleware::class,
+            'delivery_token' => \App\Middleware\DeliveryTokenMiddleware::class,
         ];
 
         $name = $spec;

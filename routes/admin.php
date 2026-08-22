@@ -93,6 +93,7 @@ $router->group(['prefix' => '/admin', 'middleware' => ['admin']], function (Rout
     $router->post('/orders/{id}/refund', [OrderController::class, 'refund'], ['csrf']);
     $router->get('/orders/{id}/invoice', [OrderController::class, 'invoice']);
     $router->post('/orders/{id}/shipment', [OrderController::class, 'saveShipment'], ['csrf']);
+    $router->post('/orders/{id}/assign-delivery', [OrderController::class, 'assignDelivery'], ['csrf']);
 
     $router->get('/customers', [CustomerController::class, 'index']);
     $router->get('/customers/{id}', [CustomerController::class, 'show']);

@@ -33,9 +33,13 @@ $genPassword = static fn () => 'Ht' . bin2hex(random_bytes(4)) . '!9';
 
 $managerPassword = $genPassword();
 $developerPassword = $genPassword();
+$riderPassword = $genPassword();
 
 seed_account($db, $roleIds, 'owner', 'Store Owner', 'admin@gmail.com', 'admin123');
 seed_account($db, $roleIds, 'manager', 'Store Manager', 'manager@happytails.test', $managerPassword);
 seed_account($db, $roleIds, 'developer', 'Dev Account', 'developer@happytails.test', $developerPassword);
+// Demo rider account for the delivery Android app — sign in with these in
+// the app's login screen. Add more via Admin -> Users, role "Delivery Partner".
+seed_account($db, $roleIds, 'delivery', 'Demo Rider', 'rider@happytails.test', $riderPassword);
 
 echo "\n  ── Save these credentials now, they will not be shown again ──\n";
