@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import FadeIn from '../components/FadeIn'
 import Magnet from '../components/Magnet'
 import ContactButton from '../components/ContactButton'
@@ -10,13 +11,21 @@ export default function HeroSection() {
       <FadeIn delay={0} y={-20} as="nav">
         <div className="flex justify-between px-6 pt-6 md:px-10 md:pt-8">
           {NAV_LINKS.map((link) => (
-            <a
+            <motion.a
               key={link}
               href={`#${link.toLowerCase()}`}
-              className="text-sm font-medium uppercase tracking-wider text-[#D7E2EA] transition-opacity duration-200 hover:opacity-70 md:text-lg lg:text-[1.4rem]"
+              className="relative text-sm font-medium uppercase tracking-wider text-[#D7E2EA] md:text-lg lg:text-[1.4rem]"
+              initial="rest"
+              whileHover="hover"
+              animate="rest"
             >
               {link}
-            </a>
+              <motion.span
+                className="absolute -bottom-1 left-0 h-[1.5px] w-full origin-left bg-[#D7E2EA]"
+                variants={{ rest: { scaleX: 0, opacity: 0 }, hover: { scaleX: 1, opacity: 1 } }}
+                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              />
+            </motion.a>
           ))}
         </div>
       </FadeIn>
@@ -32,20 +41,25 @@ export default function HeroSection() {
 
         <div className="relative flex flex-1 items-center justify-center">
           <div className="absolute left-1/2 top-1/2 z-10 w-[280px] -translate-x-1/2 -translate-y-1/2 sm:top-auto sm:w-[360px] sm:translate-y-0 sm:bottom-0 md:w-[440px] lg:w-[520px]">
-            <Magnet
-              padding={150}
-              strength={3}
-              activeTransition="transform 0.3s ease-out"
-              inactiveTransition="transform 0.6s ease-in-out"
+            <motion.div
+              animate={{ y: [0, -14, 0] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
             >
-              <FadeIn delay={0.6} y={30}>
-                <img
-                  src="https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png"
-                  alt="Jack portrait"
-                  className="w-full"
-                />
-              </FadeIn>
-            </Magnet>
+              <Magnet
+                padding={150}
+                strength={3}
+                activeTransition="transform 0.3s ease-out"
+                inactiveTransition="transform 0.6s ease-in-out"
+              >
+                <FadeIn delay={0.6} y={30}>
+                  <img
+                    src="https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png"
+                    alt="Jack portrait"
+                    className="w-full"
+                  />
+                </FadeIn>
+              </Magnet>
+            </motion.div>
           </div>
         </div>
 

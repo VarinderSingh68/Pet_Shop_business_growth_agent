@@ -17,19 +17,19 @@ export default function ServicesSection() {
         {services.map((service, i) => (
           <FadeIn key={service.number} delay={i * 0.1} y={30}>
             <div
-              className="flex items-center gap-6 py-8 sm:py-10 md:py-12"
+              className="group flex items-center gap-6 py-8 transition-colors duration-300 sm:py-10 md:py-12"
               style={{
                 borderTop: i === 0 ? '1px solid rgba(12, 12, 12, 0.15)' : undefined,
                 borderBottom: '1px solid rgba(12, 12, 12, 0.15)',
               }}
             >
               <span
-                className="font-black text-[#0C0C0C]"
+                className="font-black leading-none text-[#0C0C0C] transition-colors duration-300 group-hover:text-[#B600A8]"
                 style={{ fontSize: 'clamp(3rem, 10vw, 140px)' }}
               >
                 {service.number}
               </span>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 transition-transform duration-300 ease-out group-hover:translate-x-3">
                 <h3
                   className="font-medium uppercase text-[#0C0C0C]"
                   style={{ fontSize: 'clamp(1rem, 2.2vw, 2.1rem)' }}
@@ -37,8 +37,8 @@ export default function ServicesSection() {
                   {service.name}
                 </h3>
                 <p
-                  className="max-w-2xl font-light leading-relaxed text-[#0C0C0C]"
-                  style={{ fontSize: 'clamp(0.85rem, 1.6vw, 1.25rem)', opacity: 0.6 }}
+                  className="max-w-2xl font-light leading-relaxed text-[#0C0C0C] opacity-60 transition-opacity duration-300 group-hover:opacity-90"
+                  style={{ fontSize: 'clamp(0.85rem, 1.6vw, 1.25rem)' }}
                 >
                   {service.description}
                 </p>

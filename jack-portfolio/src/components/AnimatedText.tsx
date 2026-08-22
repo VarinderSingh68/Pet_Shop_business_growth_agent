@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import type { MotionValue } from 'framer-motion'
 import { useRef } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 interface AnimatedTextProps {
   text: string
@@ -16,13 +16,28 @@ export default function AnimatedText({ text, className, style }: AnimatedTextPro
     offset: ['start 0.8', 'end 0.2'],
   })
 
-  const characters = text.split('')
+  const total = text.length
+  const words = text.split(' ')
+
+  const nodes: ReactNode[] = []
+  let globalIndex = 0
+
+  words.forEach((word, wi) => {
+    const startIndex = globalIndex
+    nodes.push(
+      <span key={`w-${wi}`} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+        {word.split('').map((char, ci) => (
+          <Char key={ci} char={char} index={startIndex + ci} total={total} progress={scrollYProgress} />
+        ))}
+      </span>,
+    )
+    globalIndex += word.length + 1
+    if (wi < words.length - 1) nodes.push(' ')
+  })
 
   return (
     <p ref={containerRef} className={className} style={style}>
-      {characters.map((char, i) => (
-        <Char key={i} char={char} index={i} total={characters.length} progress={scrollYProgress} />
-      ))}
+      {nodes}
     </p>
   )
 }
@@ -41,12 +56,12 @@ function Char({
   const start = index / total
   const end = start + 1 / total
   const opacity = useTransform(progress, [start, end], [0.2, 1])
-  const display = char === ' ' ? ' ' : char
+  const y = useTransform(progress, [start, end], [6, 0])
 
   return (
-    <span style={{ position: 'relative', display: 'inline-block' }}>
-      <span style={{ visibility: 'hidden' }}>{display}</span>
-      <motion.span style={{ position: 'absolute', left: 0, top: 0, opacity }}>{display}</motion.span>
+    <span style={{ position: 'relative' }}>
+      <span style={{ visibility: 'hidden' }}>{char}</span>
+      <motion.span style={{ position: 'absolute', left: 0, top: 0, opacity, y }}>{char}</motion.span>
     </span>
   )
 }

@@ -1,7 +1,9 @@
+import { motion } from 'framer-motion'
+
 export default function ContactButton() {
   return (
-    <button
-      className="rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white transition-transform duration-200 hover:scale-[1.03] sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base"
+    <motion.button
+      className="rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base"
       style={{
         background:
           'linear-gradient(123deg, #18011F 7%, #B600A8 37%, #7621B0 72%, #BE4C00 100%)',
@@ -9,8 +11,15 @@ export default function ContactButton() {
         outline: '2px solid #FFFFFF',
         outlineOffset: '-3px',
       }}
+      whileHover={{
+        scale: 1.05,
+        boxShadow:
+          '0px 6px 18px rgba(182, 0, 168, 0.45), 4px 4px 16px #7721B1 inset',
+      }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
     >
       Contact Me
-    </button>
+    </motion.button>
   )
 }

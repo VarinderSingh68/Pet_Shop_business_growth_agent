@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import type { MotionStyle } from 'framer-motion'
 import FadeIn from '../components/FadeIn'
 import LiveProjectButton from '../components/LiveProjectButton'
@@ -35,7 +35,8 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
   })
 
   const targetScale = 1 - (total - 1 - index) * 0.03
-  const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale])
+  const rawScale = useTransform(scrollYProgress, [0, 1], [1, targetScale])
+  const scale = useSpring(rawScale, { stiffness: 260, damping: 32, mass: 0.4 })
 
   const stackStyle: MotionStyle = {
     ['--stack-offset' as string]: `${index * 28}px`,
@@ -46,12 +47,13 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
     <div ref={containerRef} className="h-[85vh]">
       <motion.div
         style={stackStyle}
-        className="sticky top-[calc(6rem+var(--stack-offset))] rounded-[40px] border-2 border-[#D7E2EA] bg-[#0C0C0C] p-4 sm:rounded-[50px] sm:p-6 md:top-[calc(8rem+var(--stack-offset))] md:rounded-[60px] md:p-8"
+        whileHover={{ borderColor: 'rgba(215, 226, 234, 1)' }}
+        className="group sticky top-[calc(6rem+var(--stack-offset))] rounded-[40px] border-2 border-[#D7E2EA]/70 bg-[#0C0C0C] p-4 shadow-[0_0_0_rgba(0,0,0,0)] transition-shadow duration-500 hover:shadow-[0_20px_60px_-15px_rgba(215,226,234,0.15)] sm:rounded-[50px] sm:p-6 md:top-[calc(8rem+var(--stack-offset))] md:rounded-[60px] md:p-8"
       >
         <div className="flex flex-wrap items-center justify-between gap-4 pb-6 md:pb-10">
           <div className="flex items-center gap-4">
             <span
-              className="font-black text-[#D7E2EA]"
+              className="font-black leading-none text-[#D7E2EA]"
               style={{ fontSize: 'clamp(3rem, 10vw, 140px)' }}
             >
               {project.number}
@@ -66,32 +68,38 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
             </div>
           </div>
 
-          <LiveProjectButton />
+          <div className="ml-auto">
+            <LiveProjectButton />
+          </div>
         </div>
 
         <div className="flex gap-3">
           <div className="flex w-[40%] flex-col gap-3">
-            <img
-              src={project.col1Image1}
-              alt={`${project.name} preview 1`}
-              loading="lazy"
-              className="w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
-              style={{ height: 'clamp(130px, 16vw, 230px)' }}
-            />
-            <img
-              src={project.col1Image2}
-              alt={`${project.name} preview 2`}
-              loading="lazy"
-              className="w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
-              style={{ height: 'clamp(160px, 22vw, 340px)' }}
-            />
+            <div className="overflow-hidden rounded-[40px] sm:rounded-[50px] md:rounded-[60px]">
+              <img
+                src={project.col1Image1}
+                alt={`${project.name} preview 1`}
+                loading="lazy"
+                className="w-full scale-100 object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                style={{ height: 'clamp(130px, 16vw, 230px)' }}
+              />
+            </div>
+            <div className="overflow-hidden rounded-[40px] sm:rounded-[50px] md:rounded-[60px]">
+              <img
+                src={project.col1Image2}
+                alt={`${project.name} preview 2`}
+                loading="lazy"
+                className="w-full scale-100 object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                style={{ height: 'clamp(160px, 22vw, 340px)' }}
+              />
+            </div>
           </div>
-          <div className="w-[60%]">
+          <div className="w-[60%] overflow-hidden rounded-[40px] sm:rounded-[50px] md:rounded-[60px]">
             <img
               src={project.col2Image}
               alt={`${project.name} preview 3`}
               loading="lazy"
-              className="h-full w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
+              className="h-full w-full scale-100 object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
           </div>
         </div>

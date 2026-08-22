@@ -1,6 +1,26 @@
+import { motion } from 'framer-motion'
 import FadeIn from '../components/FadeIn'
 import AnimatedText from '../components/AnimatedText'
 import ContactButton from '../components/ContactButton'
+
+interface FloatProps {
+  children: React.ReactNode
+  duration?: number
+  distance?: number
+  rotate?: number
+  delay?: number
+}
+
+function Float({ children, duration = 5, distance = 14, rotate = 4, delay = 1 }: FloatProps) {
+  return (
+    <motion.div
+      animate={{ y: [0, -distance, 0], rotate: [0, rotate, 0] }}
+      transition={{ duration, repeat: Infinity, ease: 'easeInOut', delay }}
+    >
+      {children}
+    </motion.div>
+  )
+}
 
 export default function AboutSection() {
   return (
@@ -15,11 +35,13 @@ export default function AboutSection() {
         duration={0.9}
         className="absolute left-[1%] top-[4%] w-[120px] sm:left-[2%] sm:w-[160px] md:left-[4%] md:w-[210px]"
       >
-        <img
-          src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png"
-          alt="Moon"
-          className="w-full"
-        />
+        <Float duration={5} distance={12} rotate={-5} delay={1}>
+          <img
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png"
+            alt="Moon"
+            className="w-full"
+          />
+        </Float>
       </FadeIn>
 
       <FadeIn
@@ -29,11 +51,13 @@ export default function AboutSection() {
         duration={0.9}
         className="absolute bottom-[8%] left-[3%] w-[100px] sm:left-[6%] sm:w-[140px] md:left-[10%] md:w-[180px]"
       >
-        <img
-          src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png"
-          alt="3D object"
-          className="w-full"
-        />
+        <Float duration={6} distance={16} rotate={6} delay={1.2}>
+          <img
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png"
+            alt="3D object"
+            className="w-full"
+          />
+        </Float>
       </FadeIn>
 
       <FadeIn
@@ -43,11 +67,13 @@ export default function AboutSection() {
         duration={0.9}
         className="absolute right-[1%] top-[4%] w-[120px] sm:right-[2%] sm:w-[160px] md:right-[4%] md:w-[210px]"
       >
-        <img
-          src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png"
-          alt="Lego"
-          className="w-full"
-        />
+        <Float duration={5.5} distance={12} rotate={5} delay={1.1}>
+          <img
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png"
+            alt="Lego"
+            className="w-full"
+          />
+        </Float>
       </FadeIn>
 
       <FadeIn
@@ -57,11 +83,13 @@ export default function AboutSection() {
         duration={0.9}
         className="absolute bottom-[8%] right-[3%] w-[130px] sm:right-[6%] sm:w-[170px] md:right-[10%] md:w-[220px]"
       >
-        <img
-          src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png"
-          alt="3D group"
-          className="w-full"
-        />
+        <Float duration={6.5} distance={16} rotate={-6} delay={1.3}>
+          <img
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png"
+            alt="3D group"
+            className="w-full"
+          />
+        </Float>
       </FadeIn>
 
       <div className="flex flex-col items-center gap-10 sm:gap-14 md:gap-16">
